@@ -1,0 +1,11 @@
+Plancha 1 -- SOII
+Carpeta principal: nachos/code/threads
+1.- La máquina virtual simulada para Nachos tiene MEMORY_SIZE = NUM_PHYS_PAGES * PAGE_SIZE.
+ NUM_PHYS_PAGES vale 32 y PAGE_SIZE vale 128, por lo tanto tiene 4096 bytes de memoria.
+
+2.- Para modificar este valor deberíamos modificar el tamaño del sector del disco (la variable SECTOR_SIZE ubicada en el archivo disk.hh) y no NUM_PHYS_PAGES
+porque estaría modificando la arquitectura (machine.hh).
+
+3.- El tamaño de un disco está dado por la cantidad de tracks y sectores que tiene, en este caso tiene 32 tracks y 32 sectores de 128 bytes. Por lo tanto
+el tamaño del disco será de 131072 bytes.
+
