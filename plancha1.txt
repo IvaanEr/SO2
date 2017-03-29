@@ -9,3 +9,48 @@ porque estaría modificando la arquitectura (machine.hh).
 3.- El tamaño de un disco está dado por la cantidad de tracks y sectores que tiene, en este caso tiene 32 tracks y 32 sectores de 128 bytes. Por lo tanto
 el tamaño del disco será de 131072 bytes.
 
+5.- La operación ADD (definida en /machine/mips_sim.cc) primero suma los registros rs y rt. Luego chequea, si los sumandos tienen distinto signo o si los sumandos tienen igual signo pero el resultado 'sum' tiene un signo distinto lanza la excepcion "OVERFLOW_EXCEPTION". Si no hay excepción guarda el resultado de la suma en el registro rd.
+
+
+
+8.- Archivo: /threads/utility.hh
+
+Las banderas de depuración se activan con -d en los comandos pasados a Nachos. Las banderas existentes son:
+`+` -- turn on all debug messages.
+`t` -- thread system.
+`s` -- semaphores, locks, and conditions.
+`i` -- interrupt emulation.
+`m` -- machine emulation (requires *USER_PROGRAM*).
+`d` -- disk emulation (requires *FILESYS*).
+`f` -- file system (requires *FILESYS*).
+`a` -- address spaces (requires *USER_PROGRAM*).
+`n` -- network emulation (requires *NETWORK*).
+
+11.- Archivos: /threads/list.hh ; /threads/synch_list.hh
+
+Las synch_list hacen uso de las list comunes. La principal diferencia es que las synch_list utilizan locks para que solo un hilo pueda acceder a ellas al mismo tiempo, ademas, hilos tratando de sacar un elemento de una synch_list esperan hasta que esta lista tenga un elemento.
+synch_list utiliza list en su interior.
+
+
+14.-
+
+#include <stdio.h>
+
+void
+ThreadTest()
+{
+    DEBUG('t', "Entering SimpleTest");
+
+    int i = 1;
+
+    for(i; i < 5; i++){
+        char *name = new char[64];
+        sprintf(name, "%d thread",i+1);
+        // strncpy(name, "2nd", 64);
+        Thread *newThread = new Thread(name);
+        newThread->Fork(SimpleThread, (void *) name);
+    }
+    SimpleThread((void *) "1 thread");
+}
+
+// Estoy incluyendo stdio.h, se puede!??!?!?!?!?!?!?!?!?!?!?

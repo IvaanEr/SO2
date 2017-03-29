@@ -12,7 +12,7 @@
 
 
 #include "system.hh"
-
+#include <stdio.h>
 
 /// Loop 10 times, yielding the CPU to another ready thread each iteration.
 ///
@@ -47,10 +47,14 @@ ThreadTest()
 {
     DEBUG('t', "Entering SimpleTest");
 
-    char *name = new char[64];
-    strncpy(name, "2nd", 64);
-    Thread *newThread = new Thread(name);
-    newThread->Fork(SimpleThread, (void *) name);
+    int i = 1;
 
-    SimpleThread((void *) "1st");
+    for(i; i < 5; i++){
+        char *name = new char[64];
+        sprintf(name, "%d thread",i+1);
+        // strncpy(name, "2nd", 64);
+        Thread *newThread = new Thread(name);
+        newThread->Fork(SimpleThread, (void *) name);
+    }
+    SimpleThread((void *) "1 thread");
 }
