@@ -26,6 +26,15 @@ Las banderas de depuración se activan con -d en los comandos pasados a Nachos. 
 `a` -- address spaces (requires *USER_PROGRAM*).
 `n` -- network emulation (requires *NETWORK*).
 
+9.- Archivos: /threads/utility.hh ; /threads/utility.cc
+La macro DEBUG se encarga de imprimir en pantalla mensajes (ya creados) durante el tiempo de ejecución, principalmente con el objetivo de ayudar a la corrección de código. Esto ocurrirá solo si está activada la bandera ******** está activada.
+
+//la macro está "definida" en utility .cc, no en .hh, está bien? buscar el nombre de la bandera???????????????????????
+
+La macro ASSERT toma como argumento una condición y, si la bandera ****** está activa, cada vez que esa condición no se cumpla durante el tiempo de ejecución se encargará de imprimir en pantalla un mensaje para notar que estó ocurrió.
+
+//al ser una macro, está bien decir que "toma como argumento algo" ??????????????????????????
+
 11.- Archivos: /threads/list.hh ; /threads/synch_list.hh
 
 Las synch_list hacen uso de las list comunes. La principal diferencia es que las synch_list utilizan locks para que solo un hilo pueda acceder a ellas al mismo tiempo, ademas, hilos tratando de sacar un elemento de una synch_list esperan hasta que esta lista tenga un elemento.
