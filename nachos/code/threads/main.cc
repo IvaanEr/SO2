@@ -70,7 +70,14 @@
 
 // External functions used by this file.
 
+#ifdef THREADS
 void ThreadTest();
+#endif
+
+#ifdef SEMAPHORE_TEST
+void ThreadTestSem();
+#endif
+
 void Copy(const char *unixFile, const char *nachosFile);
 void Print(const char *file);
 void PerformanceTest(void);
@@ -162,6 +169,11 @@ main(int argc, char **argv)
 
 #ifdef THREADS
     ThreadTest();
+#endif
+
+//Test the semaphore with value 3
+#ifdef SEMAPHORE_TEST
+    ThreadTestSem();
 #endif
 
     currentThread->Finish();
