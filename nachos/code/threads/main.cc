@@ -151,7 +151,7 @@ main(int argc, char **argv)
             argCount = 2;
         } else if (!strcmp(*argv, "-l"))    // List Nachos directory.
             fileSystem->List();
-        else if (!strcmp(*argv, "-D"))      // Print entire filesystem.
+        else if (!strcmp(*argv, "-D:"))      // Print entire filesystem.
             fileSystem->Print();
         else if (!strcmp(*argv, "-t"))      // Performance test.
             PerformanceTest();
