@@ -45,6 +45,7 @@ Semaphore::~Semaphore()
     delete queue;
 }
 
+
 /// Wait until semaphore `value > 0`, then decrement.
 ///
 /// Checking the value and decrementing must be done atomically, so we need
