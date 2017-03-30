@@ -13,6 +13,8 @@ el tamaño del disco será de 131072 bytes.
 
 5.- La operación ADD (definida en /machine/mips_sim.cc) primero suma los registros rs y rt. Luego chequea si los sumandos tienen distinto signo o si los sumandos tienen igual signo pero el resultado 'sum' tiene un signo distinto, en esos casos lanza la excepción "OVERFLOW_EXCEPTION". Si no hay excepción guarda el resultado de la suma en el registro rd.
 
+6.- ?????
+
 7.- Se prefiere emular una CPU antes de usar directamente la CPU existente ya que, dado que Nachos esta orientado a ser un proyecto educativo para que estudiantes puedan modificar y comprender como funciona un sistema operativo real, será posible depurar el sistema con facilidad y ejecutar tareas con mayor rapidez. Además, al emular el CPU, se dejan de lado detalles dependiendo el hardware que tenga el equipo donde se intente correr el sistema.
 
 8.- Archivo: /threads/utility.hh
@@ -59,6 +61,11 @@ La macro ASSERT toma como argumento una condición y, si la bandera ****** está
 Las synch_list hacen uso de las list comunes. La principal diferencia es que las synch_list utilizan locks para que solo un hilo pueda acceder a ellas al mismo tiempo, además, hilos tratando de sacar un elemento de una synch_list esperan hasta que esta lista tenga un elemento.
 synch_list utiliza list en su interior.
 
+12.- Archivos: /threads/main.cc
+
+La función main está definida en el archivo main.cc, la función main del ejecutable nachos de la carpeta userprog está definida también en /threads/main.cc y se ejecuta dependiendo desde donde se esté ejecutando (ocurrirá esto si la constante USERPROG está definida en el make de dicho directorio).
+
+//tiene sentido????????????????
 
 13.- Nachos soporta la siguiente línea de comandos:
        nachos -d -rs 
@@ -114,3 +121,12 @@ ThreadTest()
 }
 
 // Estoy incluyendo stdio.h, se puede!??!?!?!?!?!?!?!?!?!?!?
+
+15.- 
+
+
+
+
+
+
+
