@@ -9,9 +9,11 @@ porque estaría modificando la arquitectura (machine.hh).
 3.- El tamaño de un disco está dado por la cantidad de tracks y sectores que tiene, en este caso tiene 32 tracks y 32 sectores de 128 bytes. Por lo tanto
 el tamaño del disco será de 131072 bytes.
 
+4.- La definición de las instrucciones se encuentran en "encoding.hh". Cada una comienza con el codigo "OP" pero la instruccion "OP_RES" es un codigo reservado y no una instrucción en si. "OP_UNIMP" es una instrucción legal que todavia no se ha implementado. Por lo tanto, son 59 las instrucciones MIPS simuladas por Nachos.
+
 5.- La operación ADD (definida en /machine/mips_sim.cc) primero suma los registros rs y rt. Luego chequea, si los sumandos tienen distinto signo o si los sumandos tienen igual signo pero el resultado 'sum' tiene un signo distinto lanza la excepcion "OVERFLOW_EXCEPTION". Si no hay excepción guarda el resultado de la suma en el registro rd.
 
-
+7.- Se prefiere emular una CPU antes de usar directamente la CPU existente ya que, dado que Nachos esta orientado a ser un proyecto educativo para que estudiantes puedan modificar y comprender como funciona un sistema operativo real, sera posible depurar el sistema con facilidad y ejecutar tareas con mayor rapidez. Ademas, al emular el CPU, se dejan de lado detalles dependiendo el hardware que tenga el equipo donde se intente correr el sistema.
 
 8.- Archivo: /threads/utility.hh
 
@@ -35,11 +37,60 @@ La macro ASSERT toma como argumento una condición y, si la bandera ****** está
 
 //al ser una macro, está bien decir que "toma como argumento algo" ??????????????????????????
 
+10.- Estas constantes permiten decidir que modulos incluir durante la compilacion dependiendo de la carpeta donde se compile el proyecto. Dichas constantes se encuentran definidas en:
+  USER_PROGRAM: 
+    filesys/Makefile
+    network/Makefile
+    userprog/Makefile
+    vmem/Makefile
+  FILESYS_NEEDED:
+    filesys/Makefile
+    network/Makefile
+    userprog/Makefile
+    vmem/Makefile
+  FILESYS_STUB:
+    userprog/Makefile
+    vmem/Makefile
+  NETWORK:
+    network/Makefile
+
 11.- Archivos: /threads/list.hh ; /threads/synch_list.hh
 
 Las synch_list hacen uso de las list comunes. La principal diferencia es que las synch_list utilizan locks para que solo un hilo pueda acceder a ellas al mismo tiempo, ademas, hilos tratando de sacar un elemento de una synch_list esperan hasta que esta lista tenga un elemento.
 synch_list utiliza list en su interior.
 
+
+13.- Nachos soporta la siguiente linea de comandos:
+       nachos -d -rs 
+              -s -x -c   
+              -f -cp  
+              -p  -r  -l -D -t
+              -n  -m 
+              -o 
+              -z
+
+USER_PROGRAM
+   -s causes user programs to be executed in single-step mode
+   -x ejecuta un programa pasado por el usuario
+   -c prueba la consola
+
+ FILESYS 
+   -f formatea el disco fisico
+   -cp copia un archivo de UNIX a Nachos
+   -p imprime el contenido de un archivo de Nachos por salida estandar
+   -r elimina un archivo de Nachos del file system
+   -l ls en Nachos
+   -D imprime el contenido del file system 
+   -t testea el file system
+
+ NETWORK 
+   -n setea la robustes de la red
+   -m setea el id de la maquina como host
+   -o corre una prueba sencilla del software de red de Nachos
+
+  La opcion -rs permite que durante la ejecucion de un thread este pueda realizar un yield en cualquier momento. Ademas, puede repetirse.
+
+  -z imprime el copyright de Nachos
 
 14.-
 
