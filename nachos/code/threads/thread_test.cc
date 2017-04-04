@@ -18,22 +18,40 @@
 ///
 /// * `name` points to a string with a thread name, just for debugging
 ///   purposes.
-#ifdef THREADS
+
+#ifdef SEMAPHORE_TEST
+  #include "synch.hh"
+  Semaphore* sem = new Semaphore("test",3);
+#endif
+
 void
 SimpleThread(void *name_)
 {
     // Reinterpret arg `name` as a string.
     char *name = (char *) name_;
 
+
     // If the lines dealing with interrupts are commented, the code will
     // behave incorrectly, because printf execution may cause race
     // conditions.
     for (unsigned num = 0; num < 10; num++) {
+      #ifdef SEMAPHORE_TEST
+        sem->P(); //take the sem
+        DEBUG('s',"*** Thread `%s` has done P\n", name);
+      #endif
+
         //IntStatus oldLevel = interrupt->SetLevel(IntOff);
         printf("*** Thread `%s` is running: iteration %d\n", name, num);
         //interrupt->SetLevel(oldLevel);
-        currentThread->Yield();
+      
+      #ifdef SEMAPHORE_TEST
+        sem->V(); // release the sem
+        DEBUG('s',"*** Thread `%s` has done V\n", name);
+      #endif    
+
+      currentThread->Yield();
     }
+    
     //IntStatus oldLevel = interrupt->SetLevel(IntOff);
     printf("!!! Thread `%s` has finished\n", name);
     //interrupt->SetLevel(oldLevel);
@@ -57,64 +75,3 @@ ThreadTest()
     }
     SimpleThread((void *) "1 thread");
 }
-#endif
-
-
-#ifdef SEMAPHORE_TEST
-
-#include "synch.hh"
-
-Semaphore* sem = new Semaphore("test",3);
-
-void
-SimpleThreadSem(void *name_)
-{
-    // Reinterpret arg `name` as a string.
-    char *name = (char *) name_;
-
-    // If the lines dealing with interrupts are commented, the code will
-    // behave incorrectly, because printf execution may cause race
-    // conditions.
-
-    sem->P(); //take the sem
-    DEBUG('s',"*** Thread `%s` has done P\n", name);
-
-    for (unsigned num = 0; num < 10; num++) {
-        IntStatus oldLevel = interrupt->SetLevel(INT_OFF);
-        
-        
-        printf("*** Thread `%s` is running: iteration %d\n", name, num);
-        currentThread->Yield();
-        
-        interrupt->SetLevel(oldLevel);
-        
-    }
-
-    sem->V(); // release the sem
-    DEBUG('s',"*** Thread `%s` has done V\n", name);
-    
-    IntStatus oldLevel = interrupt->SetLevel(INT_OFF);
-    printf("!!! Thread `%s` has finished\n", name);
-    interrupt->SetLevel(oldLevel);
-}
-
-/// Set up a ping-pong between several threads.
-///
-/// Do it by launching ten threads which call `SimpleThread`, and finally
-/// calling `SimpleThread` ourselves.
-void
-ThreadTestSem()
-{
-    DEBUG('t', "Entering SimpleTest");
-
-    for(int i = 1; i < 5; i++){
-        char *name = new char[64];
-        sprintf(name, "%d thread",i+1);
-        // strncpy(name, "2nd", 64);
-        Thread *newThread = new Thread(name);
-        newThread->Fork(SimpleThreadSem, (void *) name);
-    }
-    SimpleThreadSem((void *) "1 thread");
-}
-
-#endif

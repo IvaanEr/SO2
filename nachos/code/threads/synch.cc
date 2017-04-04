@@ -92,14 +92,22 @@ Semaphore::V()
 /// case in the network assignment will not work!
 
 Lock::Lock(const char *debugName)
-{}
+{
+  sem = new Semaphore(debugName,1);
+  name = debugName;
+}
 
 Lock::~Lock()
-{}
+{
+  delete sem;
+}
 
 void
 Lock::Acquire()
-{}
+{
+  sem -> P(); 
+  held_name = currentThread->getName();
+}
 
 void
 Lock::Release()

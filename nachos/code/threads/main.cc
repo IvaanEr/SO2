@@ -172,9 +172,6 @@ main(int argc, char **argv)
 #endif
 
 //Test the semaphore with value 3
-#ifdef SEMAPHORE_TEST
-    ThreadTestSem();
-#endif
 
     currentThread->Finish();
       // NOTE: if the procedure `main` returns, then the program `nachos`

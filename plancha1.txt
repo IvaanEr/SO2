@@ -9,13 +9,18 @@ porque estaría modificando la arquitectura (machine.hh).
 3.- El tamaño de un disco está dado por la cantidad de tracks y sectores que tiene, en este caso tiene 32 tracks y 32 sectores de 128 bytes. Por lo tanto
 el tamaño del disco será de 131072 bytes.
 
-4.- La definición de las instrucciones se encuentran en "encoding.hh". Cada una comienza con el código "OP" pero la instrucciçon "OP_RES" es un código reservado y no una instrucción en sí. "OP_UNIMP" es una instrucción legal que todavía no se ha implementado. Por lo tanto, son 59 las instrucciones MIPS simuladas por Nachos.
+4.- La definición de las instrucciones se encuentran en "encoding.hh". Cada una comienza con el código "OP" pero la instrucciçon "OP_RES" es un código reservado 
+y no una instrucción en sí. "OP_UNIMP" es una instrucción legal que todavía no se ha implementado. Por lo tanto, son 59 las instrucciones MIPS simuladas por Nachos.
 
-5.- La operación ADD (definida en /machine/mips_sim.cc) primero suma los registros rs y rt. Luego chequea si los sumandos tienen distinto signo o si los sumandos tienen igual signo pero el resultado 'sum' tiene un signo distinto, en esos casos lanza la excepción "OVERFLOW_EXCEPTION". Si no hay excepción guarda el resultado de la suma en el registro rd.
+5.- La operación ADD (definida en /machine/mips_sim.cc) primero suma los registros rs y rt. Luego chequea si los sumandos tienen distinto signo o si los sumandos 
+tienen igual signo pero el resultado 'sum' tiene un signo distinto, en esos casos lanza la excepción "OVERFLOW_EXCEPTION".
+Si no hay excepción guarda el resultado de la suma en el registro rd.
 
 6.- ?????
 
-7.- Se prefiere emular una CPU antes de usar directamente la CPU existente ya que, dado que Nachos esta orientado a ser un proyecto educativo para que estudiantes puedan modificar y comprender como funciona un sistema operativo real, será posible depurar el sistema con facilidad y ejecutar tareas con mayor rapidez. Además, al emular el CPU, se dejan de lado detalles dependiendo el hardware que tenga el equipo donde se intente correr el sistema.
+7.- Se prefiere emular una CPU antes de usar directamente la CPU existente ya que, dado que Nachos esta orientado a ser un proyecto educativo para que estudiantes
+ puedan modificar y comprender como funciona un sistema operativo real, será posible depurar el sistema con facilidad y ejecutar tareas con mayor rapidez.
+Además, al emular el CPU, se dejan de lado detalles dependiendo el hardware que tenga el equipo donde se intente correr el sistema.
 
 8.- Archivo: /threads/utility.hh
 
@@ -31,15 +36,18 @@ Las banderas de depuración se activan con -d en los comandos pasados a Nachos. 
 `n` -- network emulation (requires *NETWORK*).
 
 9.- Archivos: /threads/utility.hh ; /threads/utility.cc
-La macro DEBUG se encarga de imprimir en pantalla mensajes (ya creados) durante el tiempo de ejecución, principalmente con el objetivo de ayudar a la corrección de código. Esto ocurrirá solo si está activada la bandera ******** está activada.
+La macro DEBUG se encarga de imprimir en pantalla mensajes (ya creados) durante el tiempo de ejecución, principalmente con el objetivo de ayudar a la
+corrección de código. Esto ocurrirá solo si está activada la bandera ******** está activada.
 
 //la macro está "definida" en utility .cc, no en .hh, está bien? buscar el nombre de la bandera???????????????????????
 
-La macro ASSERT toma como argumento una condición y, si la bandera ****** está activa, cada vez que esa condición no se cumpla durante el tiempo de ejecución se encargará de imprimir en pantalla un mensaje para notar que estó ocurrió.
+La macro ASSERT toma como argumento una condición y, si la bandera ****** está activa, cada vez que esa condición no se cumpla durante el tiempo de ejecución
+se encargará de imprimir en pantalla un mensaje para notar que estó ocurrió.
 
 //al ser una macro, está bien decir que "toma como argumento algo" ??????????????????????????
 
-10.- Estas constantes permiten decidir que módulos incluir durante la compilacion dependiendo de la carpeta donde se compile el proyecto. Dichas constantes se encuentran definidas en:
+10.- Estas constantes permiten decidir que módulos incluir durante la compilacion dependiendo de la carpeta donde se compile el proyecto.
+Dichas constantes se encuentran definidas en:
   USER_PROGRAM: 
     filesys/Makefile
     network/Makefile
@@ -58,12 +66,14 @@ La macro ASSERT toma como argumento una condición y, si la bandera ****** está
 
 11.- Archivos: /threads/list.hh ; /threads/synch_list.hh
 
-Las synch_list hacen uso de las list comunes. La principal diferencia es que las synch_list utilizan locks para que solo un hilo pueda acceder a ellas al mismo tiempo, además, hilos tratando de sacar un elemento de una synch_list esperan hasta que esta lista tenga un elemento.
+Las synch_list hacen uso de las list comunes. La principal diferencia es que las synch_list utilizan locks para que solo un hilo pueda acceder a
+ellas al mismo tiempo, además, hilos tratando de sacar un elemento de una synch_list esperan hasta que esta lista tenga un elemento.
 synch_list utiliza list en su interior.
 
 12.- Archivos: /threads/main.cc
 
-La función main está definida en el archivo main.cc, la función main del ejecutable nachos de la carpeta userprog está definida también en /threads/main.cc y se ejecuta dependiendo desde donde se esté ejecutando (ocurrirá esto si la constante USERPROG está definida en el make de dicho directorio).
+La función main está definida en el archivo "main.cc". La función main del ejecutable nachos de la carpeta userprog está definida también en /threads/main.cc 
+y se ejecuta dependiendo desde donde se esté ejecutando (ocurrirá esto si la constante USERPROG está definida en el make de dicho directorio).
 
 //tiene sentido????????????????
 
@@ -120,9 +130,44 @@ ThreadTest()
     SimpleThread((void *) "1 thread");
 }
 
-// Estoy incluyendo stdio.h, se puede!??!?!?!?!?!?!?!?!?!?!?
 
-15.- 
+
+15 y 16.- 
+
+#ifdef SEMAPHORE_TEST
+  #include "synch.hh"
+  Semaphore* sem = new Semaphore("test",3);
+#endif
+
+void
+SimpleThread(void *name_)
+{
+
+    char *name = (char *) name_;
+
+    for (unsigned num = 0; num < 10; num++) {
+      #ifdef SEMAPHORE_TEST
+        sem->P(); //take the sem
+        DEBUG('s',"*** Thread `%s` has done P\n", name);
+      #endif
+
+        //IntStatus oldLevel = interrupt->SetLevel(IntOff);
+        printf("*** Thread `%s` is running: iteration %d\n", name, num);
+        //interrupt->SetLevel(oldLevel);
+      
+      #ifdef SEMAPHORE_TEST
+        sem->V(); // release the sem
+        DEBUG('s',"*** Thread `%s` has done V\n", name);
+      #endif    
+
+      currentThread->Yield();
+    }
+    
+    //IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    printf("!!! Thread `%s` has finished\n", name);
+    //interrupt->SetLevel(oldLevel);
+}
+
 
 
 
