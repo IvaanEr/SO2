@@ -16,7 +16,29 @@ y no una instrucción en sí. "OP_UNIMP" es una instrucción legal que todavía 
 tienen igual signo pero el resultado 'sum' tiene un signo distinto, en esos casos lanza la excepción "OVERFLOW_EXCEPTION".
 Si no hay excepción guarda el resultado de la suma en el registro rd.
 
-6.- ?????
+6.- Las funciones y métodos llamadas por el archivo main de Nachos al ejecutarlo en el directorio threads (en un primer nivel de profundidad) son: 
+
+Initialize, definida en el archivo: "/threads/system.cc"
+
+	Esta función, ya en un segundo nivel de profundidad, llama a las siguientes funciónes y métodos:
+		
+		RandomInit //no la encuentro
+		DebugInit
+		new Statistics  estas van????
+		new Interrupt
+		new Scheduler
+		new Timer
+		CallOnUserAbort //no la encuentro
+		Cleanup, definida en el archivo: "/threads/system.cc".
+
+PrintVersion, definida en el archivo: "/threads/main.cc" (y utiliza valores de copyright.h).
+
+ThreadTest, definida en el archivo: "/threads/thread_test.cc"
+
+	Esta función, ya en un segundo nivel de profundidad, llama a las siguientes funciónes y métodos:
+		SimpleThread, definida en el archivo: "/threads/thread_test.cc"
+		newThread->Fork esta va??????????????
+
 
 7.- Se prefiere emular una CPU antes de usar directamente la CPU existente ya que, dado que Nachos esta orientado a ser un proyecto educativo para que estudiantes
  puedan modificar y comprender como funciona un sistema operativo real, será posible depurar el sistema con facilidad y ejecutar tareas con mayor rapidez.
