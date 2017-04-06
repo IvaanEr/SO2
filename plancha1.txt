@@ -47,10 +47,10 @@ Initialize, definida en el archivo: "/threads/system.cc"
 		new Scheduler  : definida en scheduler.cc
 		new Timer      : definida en timer.cc
  		
-    new Thread("main") : definida en thread.cc
-    currentThread->setStatus(RUNNING); definida en el archivo thread.hh
+    		new Thread("main") : definida en thread.cc
+    		currentThread->setStatus(RUNNING); definida en el archivo thread.hh
 
-    CallOnUserAbort : definida en /machine/system_dep.cc
+    		CallOnUserAbort : definida en /machine/system_dep.cc
 		Cleanup: definida en el archivo: "system.cc".
 
 PrintVersion, definida en el archivo: "main.cc" (y utiliza valores de copyright.h).
@@ -60,8 +60,8 @@ ThreadTest, definida en el archivo: "thread_test.cc"
 	Esta función, ya en un segundo nivel de profundidad, llama a las siguientes funciónes y métodos:
 		
 		new Thread(name) : definida en thread.cc
-    newThread->Fork(SimpleThread, (void *) name) : definida en "thread.cc"
-    SimpleThread : definida en el archivo: "thread_test.cc"
+    		newThread->Fork(SimpleThread, (void *) name) : definida en "thread.cc"
+    		SimpleThread : definida en el archivo: "thread_test.cc"
 
 7.- Se prefiere emular una CPU antes de usar directamente la CPU existente ya que, dado que Nachos esta orientado a ser un proyecto educativo para que estudiantes
  puedan modificar y comprender como funciona un sistema operativo real, será posible depurar el sistema con facilidad y ejecutar tareas con mayor rapidez.
@@ -83,14 +83,10 @@ Las banderas de depuración se activan con -d en los comandos pasados a Nachos. 
 9.- Archivos: /threads/utility.hh ; /threads/utility.cc
 La macro DEBUG se encarga de imprimir en pantalla mensajes (ya creados) durante el tiempo de ejecución, 
 principalmente con el objetivo de ayudar a la corrección de código. Esto ocurrirá solo si está activada la
-bandera -d está activada.
+bandera correspondiente compilando con "-d +".
 
-//la macro está "definida" en utility .cc, no en .hh, está bien? buscar el nombre de la bandera???????????????????????
-
-La macro ASSERT toma como argumento una condición y, si la bandera ****** está activa, cada vez que esa condición no se cumpla durante el tiempo de ejecución
-se encargará de imprimir en pantalla un mensaje para notar que estó ocurrió.
-
-//al ser una macro, está bien decir que "toma como argumento algo" ??????????????????????????
+La macro ASSERT toma como argumento una condición, y cada vez que esa condición no se cumpla durante el tiempo de ejecución
+se encargará de imprimir en pantalla un mensaje con información sobre en que línea ocurrió esto.
 
 10.- Estas constantes permiten decidir que módulos incluir durante la compilacion dependiendo de la carpeta donde se compile el proyecto.
 Dichas constantes se encuentran definidas en:
