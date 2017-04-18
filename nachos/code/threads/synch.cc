@@ -95,6 +95,7 @@ Lock::Lock(const char *debugName)
 {
   sem = new Semaphore(debugName,1);
   name = debugName;
+  hold_name = NULL;
 }
 
 Lock::~Lock()
@@ -105,13 +106,24 @@ Lock::~Lock()
 void
 Lock::Acquire()
 {
+  ASSERT(!IsHeldCurrentThread());
   sem -> P(); 
-  held_name = currentThread->getName();
+  hold_name = currentThread;
 }
 
 void
 Lock::Release()
-{}
+{
+  ASSERT(IsHeldByCurrentThread());
+  sem -> V();
+  hold_name = NULL;
+}
+
+bool
+Lock::IsHeldByCurrentThread()
+{
+  return hold_name == currentThread;
+}
 
 Condition::Condition(const char *debugName, Lock *conditionLock)
 {}

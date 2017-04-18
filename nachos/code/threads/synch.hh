@@ -114,6 +114,7 @@ private:
     const char* name;
 
     // Add other needed fields here.
+    Thread* hold_name;
 };
 
 // This class defined a “condition variable”.
