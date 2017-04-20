@@ -24,6 +24,11 @@
   Semaphore* sem = new Semaphore("test",3);
 #endif
 
+#ifdef LOCK_TEST
+  #include "synch.hh"
+  Lock *l = new Lock("l1");
+#endif
+
 void
 SimpleThread(void *name_)
 {
@@ -39,6 +44,10 @@ SimpleThread(void *name_)
         sem->P(); //take the sem
         DEBUG('s',"*** Thread `%s` has done P\n", name);
       #endif
+      #ifdef LOCK_TEST
+        l -> Acquire();
+        DEBUG('s',"*** Thread `%s` has done Acquire\n", name);
+      #endif
 
         //IntStatus oldLevel = interrupt->SetLevel(IntOff);
         printf("*** Thread `%s` is running: iteration %d\n", name, num);
@@ -48,7 +57,10 @@ SimpleThread(void *name_)
         sem->V(); // release the sem
         DEBUG('s',"*** Thread `%s` has done V\n", name);
       #endif    
-
+      #ifdef LOCK_TEST
+        l -> Release();
+        DEBUG('s',"*** Thread `%s` has done Release\n", name);
+      #endif
       currentThread->Yield();
     }
     

@@ -114,7 +114,8 @@ private:
     const char* name;
 
     // Add other needed fields here.
-    Thread* hold_name;
+    Thread *hold_name;
+    Semaphore *sem;
 };
 
 // This class defined a “condition variable”.
@@ -170,12 +171,15 @@ public:
     void Wait();
     void Signal();
     void Broadcast();
-
+ 
 private:
+    //Semaphore *sem;
 
     const char *name;
 
     // Other needed fields are to be added here.
+    Lock *lock;
+    List<Semaphore *> *sleep_queue;
 };
 
 

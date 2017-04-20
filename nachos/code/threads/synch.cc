@@ -103,10 +103,16 @@ Lock::~Lock()
   delete sem;
 }
 
+bool
+Lock::IsHeldByCurrentThread()
+{
+  return hold_name == currentThread;
+}
+
 void
 Lock::Acquire()
 {
-  ASSERT(!IsHeldCurrentThread());
+  ASSERT(!(IsHeldByCurrentThread()));
   sem -> P(); 
   hold_name = currentThread;
 }
@@ -119,28 +125,48 @@ Lock::Release()
   hold_name = NULL;
 }
 
-bool
-Lock::IsHeldByCurrentThread()
-{
-  return hold_name == currentThread;
-}
 
 Condition::Condition(const char *debugName, Lock *conditionLock)
-{}
+{
+  name = debugName;
+  lock = conditionLock;
+  sleep_queue = new List<Semaphore*>();
+
+}
 
 Condition::~Condition()
-{}
+{
+  delete sleep_queue;
+}
 
 void
 Condition::Wait()
 {
-    ASSERT(false);
+    ASSERT(lock->IsHeldByCurrentThread());
+    Semaphore *s = new Semaphore("SemaphoreForSleep",0)
+    lock->Release();
+    s->P();
+    sleep_queue->Append(s);
+    lock->Acquire();
 }
 
 void
 Condition::Signal()
-{}
+{
+    Semaphore *s;
+    ASSERT(lock->IsHeldByCurrentThread());
+    if(!sleep_queue->IsEmpty()){
+      s = sleep_queue->Remove();
+      s->V();
+    }
+}
 
 void
 Condition::Broadcast()
-{}
+{
+  Semaphore *s;
+  while(!sleep_queue->IsEmpty()){
+    s = sleep_queue->Remove();
+    s->V();
+  }
+}
