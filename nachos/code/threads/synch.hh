@@ -163,7 +163,7 @@ public:
         return name;
     }
 
-    /// The three operations on condition variables.
+2    /// The three operations on condition variables.
     ///
     /// The thread that invokes any of these operations must hold the
     /// corresponding lock; otherwise an error must occur.

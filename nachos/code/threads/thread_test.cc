@@ -69,6 +69,67 @@ SimpleThread(void *name_)
     //interrupt->SetLevel(oldLevel);
 }
 
+#ifdef COND_TEST
+#include "synch.hh"
+
+Lock *l1 = new Lock("cond_lock1");
+Lock *l2 = new Lock("cond_lock2");
+Lock *l  = new Lock("lock");
+Condition *lleno = new Condition("lleno",l);
+Condition *vacio = new Condition("vacio",l);
+
+#define T 10
+
+int buff [T];
+
+int in = 0, out = 0, n = 0; //donde meto, saco y cuantos tengo.
+// List<int> *buff  = new List<int>();
+
+void
+Productor(void*m)
+{
+  int i = 0;
+  while(1){
+
+    l -> Acquire();
+    DEBUG('s',"Productor ---> Acquire\n");
+    while(n>=T){
+      lleno -> Wait();
+      DEBUG('s',"Productor ---> Wait\n");
+    }
+
+
+    buff[in] = i++;
+    in = (in+1)%T;
+    n++;
+    printf("Produci %d\n",n);
+    vacio -> Signal();
+    DEBUG('s',"Productor ---> Signal\n");
+    l -> Release();
+    DEBUG('s',"Productor ---> Release\n");
+  }
+}
+
+void
+Consumidor(void*t)
+{
+  while(1){
+    l -> Acquire();
+    
+    while(n == 0)
+      vacio->Wait();
+    
+
+    printf("Consumi %d\n",buff[out]);
+    out = (out+1)%T;
+    n--;
+    lleno->Signal();
+    l->Release();
+  }
+}
+#endif
+
+
 /// Set up a ping-pong between several threads.
 ///
 /// Do it by launching ten threads which call `SimpleThread`, and finally
@@ -78,12 +139,20 @@ ThreadTest()
 {
     DEBUG('t', "Entering SimpleTest");
 
-    for(int i = 1; i < 5; i++){
-        char *name = new char[64];
-        sprintf(name, "%d thread",i+1);
-        // strncpy(name, "2nd", 64);
-        Thread *newThread = new Thread(name);
-        newThread->Fork(SimpleThread, (void *) name);
-    }
-    SimpleThread((void *) "1 thread");
-}
+    // for(int i = 1; i < 5; i++){
+    //     char *name = new char[64];
+    //     sprintf(name, "%d thread",i+1);
+    //     // strncpy(name, "2nd", 64);
+    //     Thread *newThread = new Thread(name);
+    //     newThread->Fork(SimpleThread, (void *) name);
+    // }
+    // SimpleThread((void *) "1 thread");v
+    #ifdef COND_TEST
+    void *m = NULL;
+    Thread *cons = new Thread("cons");
+    Thread *prod = new Thread("prod");
+    
+    prod->Fork(Consumidor,m);
+    cons->Fork(Productor,m);
+    #endif
+} 

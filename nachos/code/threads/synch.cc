@@ -143,10 +143,11 @@ void
 Condition::Wait()
 {
     ASSERT(lock->IsHeldByCurrentThread());
-    Semaphore *s = new Semaphore("SemaphoreForSleep",0)
+    Semaphore *s = new Semaphore("SemaphoreForSleep",0);
+    sleep_queue->Append(s);
+
     lock->Release();
     s->P();
-    sleep_queue->Append(s);
     lock->Acquire();
 }
 
