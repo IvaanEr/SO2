@@ -94,7 +94,7 @@ private:
 public:
 
     /// Initialize a `Thread`.
-    Thread(const char *debugName);
+    Thread(const char *debugName, bool JoinCall);
 
     /// Deallocate a Thread.
     ///
@@ -149,6 +149,8 @@ private:
 
     const char *name;
 
+    Port *port; //used for Thread::Join()
+    bool CanCallJoin;
     /// Allocate a stack for thread.  Used internally by `Fork`.
     void StackAllocate(VoidFunctionPtr func, void *arg);
 

@@ -163,7 +163,7 @@ public:
         return name;
     }
 
-2    /// The three operations on condition variables.
+    /// The three operations on condition variables.
     ///
     /// The thread that invokes any of these operations must hold the
     /// corresponding lock; otherwise an error must occur.
@@ -173,10 +173,7 @@ public:
     void Broadcast();
  
 private:
-    //Semaphore *sem;
-
     const char *name;
-
     // Other needed fields are to be added here.
     Lock *lock;
     List<Semaphore *> *sleep_queue;

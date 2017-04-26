@@ -31,12 +31,14 @@ const unsigned STACK_FENCEPOST = 0xdeadbeef;
 /// `Thread::Fork`.
 ///
 /// * `threadName` is an arbitrary string, useful for debugging.
-Thread::Thread(const char* threadName)
+Thread::Thread(const char* threadName, bool JoinCall)
 {
     name     = threadName;
     stackTop = NULL;
     stack    = NULL;
     status   = JUST_CREATED;
+    port     = new Port("JoinPort");
+    CanCallJoin = JoinCall;
 #ifdef USER_PROGRAM
     space    = NULL;
 #endif
@@ -201,6 +203,12 @@ Thread::Sleep()
     }
 
     scheduler->Run(nextThread);  // Returns when we have been signalled.
+}
+
+void Thread::Join(){
+    ASSERT(CanCAllJoin);
+    int *buff;
+    port->Receive(buff);
 }
 
 /// ThreadFinish, InterruptEnable

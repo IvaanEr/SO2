@@ -171,3 +171,38 @@ Condition::Broadcast()
     s->V();
   }
 }
+
+Port::Port(char* debugName){
+  name = debugName;
+  lock = new Lock("PortLock");
+  full = new Condition("PortConditionLleno",lock);
+  empty = new Condition("PortConditionVacio",lock);
+  IsEmpty = true;
+}
+
+Port::~Port(){
+  delete lock;
+  delete full;
+  delete empty;
+}
+
+Port::Send(int mensaje){
+  lock -> Acquire();
+  if(IsEmpty)
+    vacio -> Wait();
+  buff = mensaje;
+  IsEmpty = false;
+  full -> Signal();
+  lock -> Release();
+
+}
+
+Port::Receive(int *mensaje){
+  lock -> Acquire();
+  if(!IsEmpty)
+    lleno -> Wait();
+  *mensaje = buff;
+  IsEmpty = true;
+  empty -> Signal();
+  lock -> Release();
+}

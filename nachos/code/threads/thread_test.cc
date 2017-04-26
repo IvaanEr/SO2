@@ -102,7 +102,7 @@ Productor(void*m)
     buff[in] = i++;
     in = (in+1)%T;
     n++;
-    printf("Produci %d\n",n);
+    printf("Produci %d\n",buff[in]);
     vacio -> Signal();
     DEBUG('s',"Productor ---> Signal\n");
     l -> Release();
