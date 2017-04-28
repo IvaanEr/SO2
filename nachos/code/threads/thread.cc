@@ -23,6 +23,7 @@
 #include "system.hh"
 
 
+
 /// This is put at the top of the execution stack, for detecting stack
 /// overflows.
 const unsigned STACK_FENCEPOST = 0xdeadbeef;
@@ -31,14 +32,21 @@ const unsigned STACK_FENCEPOST = 0xdeadbeef;
 /// `Thread::Fork`.
 ///
 /// * `threadName` is an arbitrary string, useful for debugging.
-Thread::Thread(const char* threadName, bool JoinCall)
+Thread::Thread(const char* threadName, bool JoinCall) 
 {
     name     = threadName;
     stackTop = NULL;
     stack    = NULL;
     status   = JUST_CREATED;
-    port     = new Port("JoinPort");
     CanCallJoin = JoinCall;
+    
+    if(JoinCall)
+        puerto = new Puerto("JoinPort");
+    else
+        puerto = NULL;
+
+
+
 #ifdef USER_PROGRAM
     space    = NULL;
 #endif
@@ -136,8 +144,22 @@ Thread::Finish()
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
 
     threadToBeDestroyed = currentThread;
+    if(CanCallJoin)
+        puerto -> Send(1);
     Sleep();  // Invokes `SWITCH`.
     // Not reached.
+}
+
+
+//Thread Join.
+
+void
+Thread::Join()
+{
+    ASSERT(CanCallJoin);
+    int *aux;
+    puerto -> Receive(aux);
+
 }
 
 /// Relinquish the CPU if any other thread is ready to run.
@@ -205,11 +227,11 @@ Thread::Sleep()
     scheduler->Run(nextThread);  // Returns when we have been signalled.
 }
 
-void Thread::Join(){
-    ASSERT(CanCAllJoin);
-    int *buff;
-    port->Receive(buff);
-}
+// void Thread::Join(){
+//     ASSERT(CanCAllJoin);
+//     int *buff;
+//     p->Receive(buff);
+// }
 
 /// ThreadFinish, InterruptEnable
 ///
@@ -227,6 +249,8 @@ InterruptEnable()
 {
     interrupt->Enable();
 }
+
+
 
 /// Allocate and initialize an execution stack.
 ///
@@ -288,5 +312,6 @@ Thread::RestoreUserState()
     for (unsigned i = 0; i < NUM_TOTAL_REGS; i++)
         machine->WriteRegister(i, userRegisters[i]);
 }
-
 #endif
+
+

@@ -40,13 +40,14 @@
 
 
 #include "utility.hh"
+// #include "synch.hh"
 
 #ifdef USER_PROGRAM
 #include "machine/machine.hh"
 #include "userprog/address_space.hh"
 #endif
 
-
+class Puerto;
 /// CPU register state to be saved on context switch.
 ///
 /// x86 processors needs 9 32-bit registers, whereas x64 has 8 extra
@@ -116,6 +117,7 @@ public:
     /// The thread is done executing.
     void Finish();
 
+    void Join();
 
     /// Check if thread has overflowed its stack.
     void CheckOverflow();
@@ -149,8 +151,9 @@ private:
 
     const char *name;
 
-    Port *port; //used for Thread::Join()
+    Puerto *puerto; //used for Thread::Join()
     bool CanCallJoin;
+    
     /// Allocate a stack for thread.  Used internally by `Fork`.
     void StackAllocate(VoidFunctionPtr func, void *arg);
 
@@ -175,6 +178,7 @@ public:
 #endif
 };
 
+
 /// Magical machine-dependent routines, defined in `switch.s`.
 
 extern "C" {
@@ -188,6 +192,8 @@ extern "C" {
     // Stop running `oldThread` and start running `newThread`.
     void SWITCH(Thread *oldThread, Thread *newThread);
 }
+
+
 
 
 #endif

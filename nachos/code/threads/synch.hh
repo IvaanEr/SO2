@@ -179,5 +179,25 @@ private:
     List<Semaphore *> *sleep_queue;
 };
 
+class Puerto{
+public:
+    Puerto(const char* debugName);
+    ~Puerto();
+
+    const char *GetName(){
+        return name;
+    }
+
+    void Receive(int *mensaje);
+    void Send(int mensaje);
+
+private:
+    const char* name;
+    int buff;
+    Lock *lock;
+    Condition *full, *empty;
+    bool IsEmpty; 
+    //Agregar lo que haga falta...
+};
 
 #endif

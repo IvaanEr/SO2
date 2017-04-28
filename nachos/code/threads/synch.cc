@@ -172,35 +172,39 @@ Condition::Broadcast()
   }
 }
 
-Port::Port(char* debugName){
+Puerto::Puerto(const char* debugName){
   name = debugName;
-  lock = new Lock("PortLock");
-  full = new Condition("PortConditionLleno",lock);
-  empty = new Condition("PortConditionVacio",lock);
+  lock = new Lock("PuertoLock");
+  full = new Condition("PuertoConditionLleno",lock);
+  empty = new Condition("PuertoConditionVacio",lock);
   IsEmpty = true;
 }
 
-Port::~Port(){
+Puerto::~Puerto(){
   delete lock;
   delete full;
   delete empty;
 }
-
-Port::Send(int mensaje){
+void
+Puerto::Send(int mensaje){
   lock -> Acquire();
-  if(IsEmpty)
-    vacio -> Wait();
+  
+  if(!IsEmpty)        //if or while?!?!
+    empty -> Wait();
+  
   buff = mensaje;
   IsEmpty = false;
   full -> Signal();
   lock -> Release();
-
 }
 
-Port::Receive(int *mensaje){
+void
+Puerto::Receive(int *mensaje){
   lock -> Acquire();
-  if(!IsEmpty)
-    lleno -> Wait();
+  
+  if(IsEmpty)
+    full-> Wait();   //if or while!! ?!?!?!
+  
   *mensaje = buff;
   IsEmpty = true;
   empty -> Signal();

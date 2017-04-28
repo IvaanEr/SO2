@@ -72,8 +72,8 @@ SimpleThread(void *name_)
 #ifdef COND_TEST
 #include "synch.hh"
 
-Lock *l1 = new Lock("cond_lock1");
-Lock *l2 = new Lock("cond_lock2");
+// Lock *l1 = new Lock("cond_lock1");
+// Lock *l2 = new Lock("cond_lock2");
 Lock *l  = new Lock("lock");
 Condition *lleno = new Condition("lleno",l);
 Condition *vacio = new Condition("vacio",l);
@@ -117,7 +117,7 @@ Consumidor(void*t)
     l -> Acquire();
     
     while(n == 0)
-      vacio->Wait();
+      vacio -> Wait();
     
 
     printf("Consumi %d\n",buff[out]);
@@ -149,10 +149,14 @@ ThreadTest()
     // SimpleThread((void *) "1 thread");v
     #ifdef COND_TEST
     void *m = NULL;
-    Thread *cons = new Thread("cons");
-    Thread *prod = new Thread("prod");
+    Thread *cons = new Thread("cons",true);
+    Thread *prod = new Thread("prod",true);
     
     prod->Fork(Consumidor,m);
     cons->Fork(Productor,m);
+
+    prod->Join();
+    cons->Join();
+
     #endif
 } 
