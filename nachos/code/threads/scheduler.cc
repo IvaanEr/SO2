@@ -25,17 +25,18 @@
 /// Initialize the list of ready but not running threads to empty.
 Scheduler::Scheduler()
 {
-    for(int i = 0; i < 10; i++)
-      &(readyList[i]) = new List<Thread*>;
-    
+    //for(int i = 0; i < PRIORITY_MAX; i++)
+      //(readyList[i]) = new List<Thread*>;
+      readyList = new List<Thread*>[PRIORITY_MAX];
 }
 
 /// De-allocate the list of ready threads.
 Scheduler::~Scheduler()
 {
-    for(int i = 0; i < 10; i++)
-      delete &(readyList[i]);
-}
+    //for(int i = 0; i < PRIORITY_MAX; i++)
+      //delete (readyList[i]);
+    delete[] readyList;
+} 
 
 /// Mark a thread as ready, but not running.
 /// Put it on the ready list, for later scheduling onto the CPU.
@@ -48,7 +49,7 @@ Scheduler::ReadyToRun(Thread *thread)
 
     thread->setStatus(READY);
     int prio = thread->Priority;
-    readyList[prio].Append(thread);
+    readyList[prio]->Append(thread);
 }
 
 /// Return the next thread to be scheduled onto the CPU.
@@ -59,9 +60,11 @@ Scheduler::ReadyToRun(Thread *thread)
 Thread *
 Scheduler::FindNextToRun()
 {
-    for (int i = 9; i>=0; i--)
-      if (!(readyList[i].IsEmpty()))
-        return readyList[i].Remove();
+
+    for (int i = PRIORITY_MAX-1; i >= 0; i--)
+      if (!(readyList[i]->IsEmpty()))
+        return readyList[i]->Remove();
+
 }
 
 /// Dispatch the CPU to `nextThread`.
@@ -138,5 +141,9 @@ void
 Scheduler::Print()
 {
     printf("Ready list contents:\n");
-    readyList->Apply(ThreadPrint);
+    for(int i = PRIORITY_MAX-1; i>=0; i--){
+      printf("Priority List nº: %d\n",i);       
+      readyList[i]->Apply(ThreadPrint);
+    }
+    
 }

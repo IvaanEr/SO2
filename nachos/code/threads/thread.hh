@@ -95,7 +95,7 @@ private:
 public:
 
     /// Initialize a `Thread`.
-    Thread(const char *debugName, bool JoinCall, int priority);
+    Thread(const char *debugName, bool JoinCall, int actual_priority);
 
     /// Deallocate a Thread.
     ///
@@ -154,8 +154,8 @@ private:
     Puerto *puerto; //used for Thread::Join()
     bool CanCallJoin;
     
-    int Priority; //priority
-    
+    int OldPriority; //priority
+    int ActualPriority;
     /// Allocate a stack for thread.  Used internally by `Fork`.
     void StackAllocate(VoidFunctionPtr func, void *arg);
 

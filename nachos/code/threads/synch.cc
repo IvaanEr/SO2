@@ -113,6 +113,12 @@ void
 Lock::Acquire()
 {
   ASSERT(!(IsHeldByCurrentThread()));
+  if (hold_name != NULL){
+    int HolderPriority = hold_name -> ActualPriority
+    if (HolderPriority > currentThread->ActualPriority)
+      
+  }
+        
   sem -> P(); 
   hold_name = currentThread;
 }

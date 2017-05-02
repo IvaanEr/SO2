@@ -32,14 +32,15 @@ const unsigned STACK_FENCEPOST = 0xdeadbeef;
 /// `Thread::Fork`.
 ///
 /// * `threadName` is an arbitrary string, useful for debugging.
-Thread::Thread(const char* threadName, bool JoinCall, int priority) 
+Thread::Thread(const char* threadName, bool JoinCall, int actual_priority) 
 {
     name     = threadName;
     stackTop = NULL;
     stack    = NULL;
     status   = JUST_CREATED;
     CanCallJoin = JoinCall;
-    Priority = priority;
+    ActualPriority = actual_priority;
+    //OldPriority = -1;
     
     if(JoinCall)
         puerto = new Puerto("JoinPort");
@@ -68,6 +69,8 @@ Thread::~Thread()
     ASSERT(this != currentThread);
     if (stack != NULL)
         DeallocBoundedArray((char *) stack, STACK_SIZE * sizeof *stack);
+    if(JoinCall)
+        delete puerto;
 }
 
 /// Invoke `(*func)(arg)`, allowing caller and callee to execute
@@ -158,8 +161,8 @@ void
 Thread::Join()
 {
     ASSERT(CanCallJoin);
-    int *aux;
-    puerto -> Receive(aux);
+    int aux;
+    puerto -> Receive(&aux);
 
 }
 
