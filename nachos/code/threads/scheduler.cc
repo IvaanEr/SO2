@@ -25,13 +25,16 @@
 /// Initialize the list of ready but not running threads to empty.
 Scheduler::Scheduler()
 {
-    readyList = new List<Thread*>;
+    for(int i = 0; i < 10; i++)
+      &(readyList[i]) = new List<Thread*>;
+    
 }
 
 /// De-allocate the list of ready threads.
 Scheduler::~Scheduler()
 {
-    delete readyList;
+    for(int i = 0; i < 10; i++)
+      delete &(readyList[i]);
 }
 
 /// Mark a thread as ready, but not running.
@@ -44,7 +47,8 @@ Scheduler::ReadyToRun(Thread *thread)
     DEBUG('t', "Putting thread %s on ready list.\n", thread->getName());
 
     thread->setStatus(READY);
-    readyList->Append(thread);
+    int prio = thread->Priority;
+    readyList[prio].Append(thread);
 }
 
 /// Return the next thread to be scheduled onto the CPU.
@@ -55,7 +59,9 @@ Scheduler::ReadyToRun(Thread *thread)
 Thread *
 Scheduler::FindNextToRun()
 {
-    return readyList->Remove();
+    for (int i = 9; i>=0; i--)
+      if (!(readyList[i].IsEmpty()))
+        return readyList[i].Remove();
 }
 
 /// Dispatch the CPU to `nextThread`.

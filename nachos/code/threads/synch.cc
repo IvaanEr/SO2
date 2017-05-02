@@ -189,7 +189,7 @@ void
 Puerto::Send(int mensaje){
   lock -> Acquire();
   
-  if(!IsEmpty)        //if or while?!?!
+  while(!IsEmpty)        //if or while?!?!
     empty -> Wait();
   
   buff = mensaje;
@@ -202,7 +202,7 @@ void
 Puerto::Receive(int *mensaje){
   lock -> Acquire();
   
-  if(IsEmpty)
+  while(IsEmpty)
     full-> Wait();   //if or while!! ?!?!?!
   
   *mensaje = buff;
