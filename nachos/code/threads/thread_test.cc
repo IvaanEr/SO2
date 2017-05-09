@@ -13,7 +13,7 @@
 
 #include "system.hh"
 #include <stdio.h>
-
+#include <unistd.h>
 /// Loop 10 times, yielding the CPU to another ready thread each iteration.
 ///
 /// * `name` points to a string with a thread name, just for debugging
@@ -98,10 +98,12 @@ Productor(void*m)
       DEBUG('s',"Productor ---> Wait\n");
     }
 
-
-    buff[in] = i++;
+    sleep(1);
+    buff[in] = i;
+    i = (i+1)%T;
     in = (in+1)%T;
     n++;
+
     printf("Produci %d\n",buff[in]);
     vacio -> Signal();
     DEBUG('s',"Productor ---> Signal\n");
@@ -118,8 +120,7 @@ Consumidor(void*t)
     
     while(n == 0)
       vacio -> Wait();
-    
-
+    sleep(1);
     printf("Consumi %d\n",buff[out]);
     out = (out+1)%T;
     n--;
@@ -129,6 +130,25 @@ Consumidor(void*t)
 }
 #endif
 
+#ifdef PORT_TEST
+#include "synch.hh"
+Puerto *port = new Puerto("puerto");
+
+void Sender(void* t)
+{
+  int msj;
+  printf("Entero a enviar:\n");
+  scanf("%d",&msj);
+  port->Send(msj);
+}
+
+void Receiver(void* m)
+{
+  int msj;
+  port->Receive(&msj);
+  printf("Recibi: %d\n",msj);
+}
+#endif
 
 /// Set up a ping-pong between several threads.
 ///
@@ -149,14 +169,22 @@ ThreadTest()
     // SimpleThread((void *) "1 thread");v
     #ifdef COND_TEST
     void *m = NULL;
-    Thread *cons = new Thread("cons",true);
-    Thread *prod = new Thread("prod",true);
+    Thread *cons = new Thread("cons",true,7);
+    Thread *prod = new Thread("prod",true,9);
     
     prod->Fork(Consumidor,m);
     cons->Fork(Productor,m);
 
     prod->Join();
     cons->Join();
+    #endif
 
+    #ifdef PORT_TEST
+    void *m = NULL;
+    Thread *env = new Thread("nev",false,5);
+    Thread *recv = new Thread("recv",false,3);
+
+    recv->Fork(Receiver,m);
+    env->Fork(Sender,m);
     #endif
 } 

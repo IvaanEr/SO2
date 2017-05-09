@@ -137,6 +137,8 @@ public:
         printf("%s, ", name);
     }
 
+    int OldPriority; //priority
+    int ActualPriority;
 private:
     // Some of the private data for this class is listed above.
 
@@ -154,8 +156,7 @@ private:
     Puerto *puerto; //used for Thread::Join()
     bool CanCallJoin;
     
-    int OldPriority; //priority
-    int ActualPriority;
+
     /// Allocate a stack for thread.  Used internally by `Fork`.
     void StackAllocate(VoidFunctionPtr func, void *arg);
 

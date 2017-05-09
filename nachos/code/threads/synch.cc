@@ -114,9 +114,12 @@ Lock::Acquire()
 {
   ASSERT(!(IsHeldByCurrentThread()));
   if (hold_name != NULL){
-    int HolderPriority = hold_name -> ActualPriority
-    if (HolderPriority > currentThread->ActualPriority)
-      
+    int HolderPriority = hold_name -> ActualPriority;
+    if (HolderPriority > currentThread->ActualPriority){
+      DEBUG('s',"Realice inversion de prioridades con %s y %s\n",hold_name->getName(),currentThread->getName());
+      hold_name -> ActualPriority = currentThread->ActualPriority;
+      hold_name -> OldPriority = HolderPriority;
+    }
   }
         
   sem -> P(); 
@@ -127,6 +130,9 @@ void
 Lock::Release()
 {
   ASSERT(IsHeldByCurrentThread());
+  
+  hold_name -> ActualPriority = hold_name -> OldPriority;
+
   sem -> V();
   hold_name = NULL;
 }
@@ -152,6 +158,13 @@ Condition::Wait()
     Semaphore *s = new Semaphore("SemaphoreForSleep",0);
     sleep_queue->Append(s);
 
+    int HolderPriority = (lock->hold_name)->ActualPriority;
+    if( HolderPriority < currentThread->ActualPriority){
+      (lock->hold_name)->ActualPriority = currentThread->ActualPriority;
+      (lock->hold_name)->OldPriority = HolderPriority;
+    }
+
+
     lock->Release();
     s->P();
     lock->Acquire();
@@ -162,6 +175,9 @@ Condition::Signal()
 {
     Semaphore *s;
     ASSERT(lock->IsHeldByCurrentThread());
+    
+    (lock->hold_name)->ActualPriority = (lock->hold_name)->OldPriority;
+    
     if(!sleep_queue->IsEmpty()){
       s = sleep_queue->Remove();
       s->V();
@@ -195,9 +211,9 @@ void
 Puerto::Send(int mensaje){
   lock -> Acquire();
   
-  while(!IsEmpty)        //if or while?!?!
+  while(!IsEmpty)
     empty -> Wait();
-  
+
   buff = mensaje;
   IsEmpty = false;
   full -> Signal();
@@ -207,10 +223,9 @@ Puerto::Send(int mensaje){
 void
 Puerto::Receive(int *mensaje){
   lock -> Acquire();
-  
   while(IsEmpty)
-    full-> Wait();   //if or while!! ?!?!?!
-  
+    full-> Wait();  
+
   *mensaje = buff;
   IsEmpty = true;
   empty -> Signal();

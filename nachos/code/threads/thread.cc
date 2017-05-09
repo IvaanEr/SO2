@@ -40,7 +40,7 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
     status   = JUST_CREATED;
     CanCallJoin = JoinCall;
     ActualPriority = actual_priority;
-    //OldPriority = -1;
+    OldPriority = actual_priority;
     
     if(JoinCall)
         puerto = new Puerto("JoinPort");
@@ -69,7 +69,7 @@ Thread::~Thread()
     ASSERT(this != currentThread);
     if (stack != NULL)
         DeallocBoundedArray((char *) stack, STACK_SIZE * sizeof *stack);
-    if(JoinCall)
+    if(CanCallJoin)
         delete puerto;
 }
 

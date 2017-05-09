@@ -48,8 +48,8 @@ Scheduler::ReadyToRun(Thread *thread)
     DEBUG('t', "Putting thread %s on ready list.\n", thread->getName());
 
     thread->setStatus(READY);
-    int prio = thread->Priority;
-    readyList[prio]->Append(thread);
+    int prio = thread->ActualPriority;
+    readyList[prio].Append(thread);
 }
 
 /// Return the next thread to be scheduled onto the CPU.
@@ -62,8 +62,8 @@ Scheduler::FindNextToRun()
 {
 
     for (int i = PRIORITY_MAX-1; i >= 0; i--)
-      if (!(readyList[i]->IsEmpty()))
-        return readyList[i]->Remove();
+      if (!(readyList[i].IsEmpty()))
+        return readyList[i].Remove();
 
 }
 
@@ -143,7 +143,7 @@ Scheduler::Print()
     printf("Ready list contents:\n");
     for(int i = PRIORITY_MAX-1; i>=0; i--){
       printf("Priority List nº: %d\n",i);       
-      readyList[i]->Apply(ThreadPrint);
+      readyList[i].Apply(ThreadPrint);
     }
     
 }

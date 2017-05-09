@@ -10,7 +10,7 @@
 # limitation of liability and disclaimer of warranty provisions.
 #-DSEMAPHORE_TEST 
 #-DTHREADS
-DEFINES      = -DTHREADS -DCOND_TEST -DDFS_TICKS_FIX 
+DEFINES      = -DTHREADS -DPORT_TEST -DDFS_TICKS_FIX 
 INCLUDE_DIRS = -I.. -I../machine
 HFILES       = $(THREAD_H)
 CFILES       = $(THREAD_C)

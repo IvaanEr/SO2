@@ -57,3 +57,19 @@ ExceptionHandler(ExceptionType which)
         ASSERT(false);
     }
 }
+
+void
+ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
+{
+	//Machine::ReadMem(unsigned addr, unsigned size, int *value)
+	int c;
+	unsigned i;
+	
+	ASSERT(machine->ReadMem(userAddress,1,&c)); //primera lectura
+	outString[0] = c;
+	
+	for(i = 1; i<maxByteCount && c!=0; i++){
+		ASSERT(machine->ReadMem(userAddress+i,1,&c))
+		outString[i] = c;
+	}
+}
