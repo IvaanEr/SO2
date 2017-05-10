@@ -231,3 +231,4 @@ Puerto::Receive(int *mensaje){
   empty -> Signal();
   lock -> Release();
 }
+

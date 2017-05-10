@@ -38,7 +38,7 @@
 #ifndef NACHOS_THREADS_THREAD__HH
 #define NACHOS_THREADS_THREAD__HH
 
-
+#include "userprog/syscall.h"
 #include "utility.hh"
 // #include "synch.hh"
 
@@ -139,6 +139,13 @@ public:
 
     int OldPriority; //priority
     int ActualPriority;
+
+    void AddFile(OpenFileId id, OpenFile* openFile);
+
+    OpenFile *GetFile(OpenFileId id);
+
+    void RemoveFile(OpenFileId id);
+
 private:
     // Some of the private data for this class is listed above.
 
@@ -156,6 +163,9 @@ private:
     Puerto *puerto; //used for Thread::Join()
     bool CanCallJoin;
     
+    //used for openfiles association
+    OpenFileId id;
+    List<(OpenFileId,OpenFile*)> *OpenFiles;
 
     /// Allocate a stack for thread.  Used internally by `Fork`.
     void StackAllocate(VoidFunctionPtr func, void *arg);
@@ -178,6 +188,7 @@ public:
 
     // User code this thread is running.
     AddressSpace *space;
+
 #endif
 };
 
@@ -195,8 +206,5 @@ extern "C" {
     // Stop running `oldThread` and start running `newThread`.
     void SWITCH(Thread *oldThread, Thread *newThread);
 }
-
-
-
 
 #endif

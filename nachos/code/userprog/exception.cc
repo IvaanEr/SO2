@@ -49,27 +49,68 @@ ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
 
-    if (which == SYSCALL_EXCEPTION && type == SC_Halt) {
-        DEBUG('a', "Shutdown, initiated by user program.\n");
-        interrupt->Halt();
+    if (which == SYSCALL_EXCEPTION) {
+        switch(type){
+        	
+        	case SC_Halt:
+		        DEBUG('a', "Shutdown, initiated by user program.\n");
+		        interrupt->Halt();
+		        //pc++
+		        break;        			
+        	
+        	case SC_Create:
+        		char name[128];
+        		int r4 = machine->ReadRegister(4);
+        		ReadStringFromUser(r4,name,128);
+        		fileSystem->Create(name);
+        	
+        	case SC_Read:
+        
+        }
     } else {
         printf("Unexpected user mode exception %d %d\n", which, type);
         ASSERT(false);
     }
 }
 
+
+//Machine::ReadMem(unsigned addr, unsigned size, int *value)
 void
 ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 {
-	//Machine::ReadMem(unsigned addr, unsigned size, int *value)
+	int c;
+	unsigned i=0;
+	
+	do{
+			ASSERT(machine->ReadMem(userAddress+i,1,&c));
+			outString[i] = c;
+			i++;
+		} while(c != 0 && i<maxByteCount);
+}
+
+void
+ReadBufferFromUser(int userAddress, char *outBuffer,unsigned byteCount)
+{
 	int c;
 	unsigned i;
-	
-	ASSERT(machine->ReadMem(userAddress,1,&c)); //primera lectura
-	outString[0] = c;
-	
-	for(i = 1; i<maxByteCount && c!=0; i++){
-		ASSERT(machine->ReadMem(userAddress+i,1,&c))
-		outString[i] = c;
+
+	for(i = 0; i<byteCount; i++){
+		ASSERT(machine->ReadMem(userAddress+i,1,&c));
+		outBuffer[i] = c;
 	}
+}
+
+//Machine::WriteMem(unsigned addr, unsigned size, int value)
+void
+WriteStringToUser(const char *string, int userAddress)
+{
+	for (int i = 0; string[i] != 0; i++)
+		ASSERT(machine->WriteMem(userAddress+i, 1, string[i])); //me fijo que sea distinto de 0 o de '\0'??????
+}
+
+void
+WriteBufferToUser(const char *buffer, int userAddress,unsigned byteCount)
+{
+	for (int i = 0; i< byteCount; i++)
+		ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
 }

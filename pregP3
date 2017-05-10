@@ -1,0 +1,8 @@
+
+
+1> Confusion con funciones ReadStringFromUser, que toman int y usar *char de buffer....
+2> Implementacion de la asociacion de OpenFileId a OpenFile *f
+	Tipo OpenFile, definido?
+	La asociacion de Consola al id 0 y 1, ya esta hecha? donde?
+	Incrementar el program counter?
+	

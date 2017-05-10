@@ -42,6 +42,8 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
     ActualPriority = actual_priority;
     OldPriority = actual_priority;
     
+    OpenFiles = new List(); //<(OpenFileId,OpenFile*)>
+    id = 2;
     if(JoinCall)
         puerto = new Puerto("JoinPort");
     else
@@ -236,6 +238,31 @@ Thread::Sleep()
 //     int *buff;
 //     p->Receive(buff);
 // }
+
+//OpenFiles methods
+OpenFileId
+Thread::AddFile(OpenFile *openFile)
+{
+    OpenFiles->SortedInsert(*openFile,id);
+    OpenFileId oldId = id;
+    id++;
+    return oldId;
+}
+
+OpenFile*
+Thread::GetFile(OpenFileId id)
+{
+    OpenFile *f = OpenFiles->SortedRemove(&id);
+    OpenFiles->SortedInsert(f,id);
+    return f;
+}
+
+void
+Thread::Remove(OpenFileId id)
+{
+    Openfile *f = OpenFiles->SortedRemove(&id);
+}
+
 
 /// ThreadFinish, InterruptEnable
 ///
