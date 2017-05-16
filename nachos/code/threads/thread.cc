@@ -42,8 +42,8 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
     ActualPriority = actual_priority;
     OldPriority = actual_priority;
     
-    OpenFiles = new List(); //<(OpenFileId,OpenFile*)>
-    id = 2;
+    OpenFiles = new List<OpenFile *>; 
+    id = 2;  //comienza en 2 porque el id 0 y 1 esta asociado a la Consola
     if(JoinCall)
         puerto = new Puerto("JoinPort");
     else
@@ -149,9 +149,9 @@ Thread::Finish()
 
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
 
-    threadToBeDestroyed = currentThread;
+    threadToBeDestroyed = currentThread;    
     if(CanCallJoin)
-        puerto -> Send(1);
+        puerto -> Send(returnValue);
     Sleep();  // Invokes `SWITCH`.
     // Not reached.
 }
@@ -159,13 +159,13 @@ Thread::Finish()
 
 //Thread Join.
 
-void
+int
 Thread::Join()
 {
     ASSERT(CanCallJoin);
     int aux;
     puerto -> Receive(&aux);
-
+    return aux;
 }
 
 /// Relinquish the CPU if any other thread is ready to run.
@@ -243,24 +243,24 @@ Thread::Sleep()
 OpenFileId
 Thread::AddFile(OpenFile *openFile)
 {
-    OpenFiles->SortedInsert(*openFile,id);
+    OpenFiles->SortedInsert(openFile,id);
     OpenFileId oldId = id;
     id++;
     return oldId;
 }
 
 OpenFile*
-Thread::GetFile(OpenFileId id)
+Thread::GetFile(OpenFileId file_id)
 {
-    OpenFile *f = OpenFiles->SortedRemove(&id);
-    OpenFiles->SortedInsert(f,id);
+    OpenFile *f = OpenFiles->SortedRemove(&file_id);
+    OpenFiles->SortedInsert(f,file_id);
     return f;
 }
 
 void
-Thread::Remove(OpenFileId id)
+Thread::RemoveFile(OpenFileId file_id)
 {
-    Openfile *f = OpenFiles->SortedRemove(&id);
+    OpenFile *f = OpenFiles->SortedRemove(&file_id);
 }
 
 

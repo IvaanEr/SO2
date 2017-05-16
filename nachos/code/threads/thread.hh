@@ -39,13 +39,22 @@
 #define NACHOS_THREADS_THREAD__HH
 
 #include "userprog/syscall.h"
+#include "filesys/open_file.hh"
 #include "utility.hh"
+#include "list.hh"
 // #include "synch.hh"
 
 #ifdef USER_PROGRAM
 #include "machine/machine.hh"
 #include "userprog/address_space.hh"
 #endif
+
+/*
+typedef struct Pair_{
+	OpenFileId id;
+	OpenFile* file;
+} Pair;
+*/
 
 class Puerto;
 /// CPU register state to be saved on context switch.
@@ -95,7 +104,7 @@ private:
 public:
 
     /// Initialize a `Thread`.
-    Thread(const char *debugName, bool JoinCall, int actual_priority);
+    Thread(const char *debugName, bool JoinCall = false, int actual_priority = 0);
 
     /// Deallocate a Thread.
     ///
@@ -137,10 +146,13 @@ public:
         printf("%s, ", name);
     }
 
+    int returnValue;
+ 
     int OldPriority; //priority
     int ActualPriority;
 
-    void AddFile(OpenFileId id, OpenFile* openFile);
+
+    OpenFileId AddFile(OpenFile* openFile);
 
     OpenFile *GetFile(OpenFileId id);
 
@@ -165,7 +177,7 @@ private:
     
     //used for openfiles association
     OpenFileId id;
-    List<(OpenFileId,OpenFile*)> *OpenFiles;
+    List<OpenFile*> *OpenFiles;
 
     /// Allocate a stack for thread.  Used internally by `Fork`.
     void StackAllocate(VoidFunctionPtr func, void *arg);

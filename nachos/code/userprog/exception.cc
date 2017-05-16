@@ -25,54 +25,16 @@
 #include "syscall.h"
 #include "threads/system.hh"
 
-
-/// Entry point into the Nachos kernel.  Called when a user program is
-/// executing, and either does a syscall, or generates an addressing or
-/// arithmetic exception.
-///
-/// For system calls, the following is the calling convention:
-///
-/// * system call code in `r2`;
-/// * 1st argument in `r4`;
-/// * 2nd argument in `r5`;
-/// * 3rd argument in `r6`;
-/// * 4th argument in `r7`;
-/// * the result of the system call, if any, must be put back into `r2`.
-///
-/// And do not forget to increment the pc before returning. (Or else you will
-/// loop making the same system call forever!)
-///
-/// * `which` is the kind of exception.  The list of possible exceptions is
-///   in `machine.hh`.
 void
-ExceptionHandler(ExceptionType which)
+IncrementPC()
 {
-    int type = machine->ReadRegister(2);
-
-    if (which == SYSCALL_EXCEPTION) {
-        switch(type){
-        	
-        	case SC_Halt:
-		        DEBUG('a', "Shutdown, initiated by user program.\n");
-		        interrupt->Halt();
-		        //pc++
-		        break;        			
-        	
-        	case SC_Create:
-        		char name[128];
-        		int r4 = machine->ReadRegister(4);
-        		ReadStringFromUser(r4,name,128);
-        		fileSystem->Create(name);
-        	
-        	case SC_Read:
-        
-        }
-    } else {
-        printf("Unexpected user mode exception %d %d\n", which, type);
-        ASSERT(false);
-    }
+  int pc = machine->ReadRegister(PC_REG);
+  machine->WriteRegister(PREV_PC_REG, pc);
+  pc = machine->ReadRegister(NEXT_PC_REG);
+  machine->WriteRegister(PC_REG, pc);
+  pc += 4; //cada instruccion es de 4bytes
+  machine->WriteRegister(NEXT_PC_REG, pc);
 }
-
 
 //Machine::ReadMem(unsigned addr, unsigned size, int *value)
 void
@@ -114,3 +76,128 @@ WriteBufferToUser(const char *buffer, int userAddress,unsigned byteCount)
 	for (int i = 0; i< byteCount; i++)
 		ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
 }
+/// Entry point into the Nachos kernel.  Called when a user program is
+/// executing, and either does a syscall, or generates an addressing or
+/// arithmetic exception.
+///
+/// For system calls, the following is the calling convention:
+///
+/// * system call code in `r2`;
+/// * 1st argument in `r4`;
+/// * 2nd argument in `r5`;
+/// * 3rd argument in `r6`;
+/// * 4th argument in `r7`;
+/// * the result of the system call, if any, must be put back into `r2`.
+///
+/// And do not forget to increment the pc before returning. (Or else you will
+/// loop making the same system call forever!)
+///
+/// * `which` is the kind of exception.  The list of possible exceptions is
+///   in `machine.hh`.
+void
+ExceptionHandler(ExceptionType which)
+{
+    int type = machine->ReadRegister(2);
+
+    if (which == SYSCALL_EXCEPTION) {
+        switch(type){
+        	
+        	case SC_Halt:
+		        DEBUG('a', "Shutdown, initiated by user program.\n");
+		        interrupt->Halt();
+		        IncrementPC();
+		        break;        			
+        	
+        	case SC_Create:
+        		{char name[128];
+        		int r4 = machine->ReadRegister(4);
+        		ReadStringFromUser(r4,name,128);
+        		if(!(fileSystem->Create(name,0))){
+              printf("Couldn't create the file %s\n", name);
+            }
+            IncrementPC();
+						break;
+            }
+        	case SC_Read://int Read(char *buffer, int size, OpenFileId id);
+            
+						{int r4 = machine->ReadRegister(4);
+            int size = machine->ReadRegister(5);
+        		OpenFileId file_id = machine->ReadRegister(6);
+						char *buffer = new char[128];
+
+            if (file_id == 0){}
+						else if (file_id == 1){}
+						else{
+							OpenFile *f = currentThread->GetFile(file_id);
+              if(f == NULL)
+                printf("The file doesn't exist \n");
+							int count = f->Read(buffer,size);
+              WriteBufferToUser(buffer,r4,size); 
+              machine->WriteRegister(2,count);
+						}
+            delete [] buffer;
+						IncrementPC();
+						break;
+            }
+					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
+           { int r4 = machine->ReadRegister(4);            
+            int size = machine->ReadRegister(5);						
+            char *buff = new char[size];
+            ReadBufferFromUser(r4,buff,size);
+            
+						OpenFileId file_id = machine->ReadRegister(6);
+            if (file_id == 0){}
+						else if (file_id == 1){}
+						else{
+              OpenFile *f = currentThread->GetFile(file_id);
+              if(f == NULL)
+                 printf("The file doesn't exist \n");
+              f->Write(buff,size);
+            }
+            delete [] buff;
+            IncrementPC();
+            break;
+            }
+          case SC_Open://OpenFileId Open(char *name);
+            {char name[128];
+            int r4 = machine->ReadRegister(4);
+            ReadStringFromUser(r4,name,128);            
+            int returnReg = 2;
+
+            OpenFile *file = fileSystem->Open(name);
+            if(file == NULL)
+              printf("Could not open the file %s\n",name);
+
+            OpenFileId id = currentThread->AddFile(file);
+            machine->WriteRegister(returnReg,id);
+            IncrementPC();
+            break;
+            }
+          case SC_Close: //void Close(OpenFileId id);
+            {OpenFileId id = machine->ReadRegister(4);
+            OpenFile *file = currentThread->GetFile(id);
+            if(file != NULL){ //OpenFile() //chequeamos que el archivo existe
+              currentThread->RemoveFile(id);
+              delete file;
+            }
+            else printf("The file doesn't exist\n");
+            IncrementPC();
+            break;
+            }
+    
+          case SC_Exit:
+             currentThread->returnValue = machine->ReadRegister(4);              
+             currentThread->Finish();
+             //IncrementPC();
+             break;
+
+         default:
+            printf("Unexpected user mode exception %d %d\n", which, type);
+            ASSERT(false);
+        }
+    } else {
+        printf("Unexpected user mode exception %d %d\n", which, type);
+        ASSERT(false);
+    }
+}
+

@@ -107,14 +107,14 @@ public:
     ///
     /// Useful for checks in `Release` and in condition variables.
     bool IsHeldByCurrentThread();
-
+		Thread *hold_name;
 private:
 
     /// For debugging.
     const char* name;
 
     // Add other needed fields here.
-    Thread *hold_name;
+
     Semaphore *sem;
 };
 

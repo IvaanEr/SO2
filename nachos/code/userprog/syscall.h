@@ -103,6 +103,7 @@ void Write(char *buffer, int size, OpenFileId id);
 /// wait until you can return at least one character).
 int Read(char *buffer, int size, OpenFileId id);
 
+
 /// Close the file, we are done reading and writing to it.
 void Close(OpenFileId id);
 
