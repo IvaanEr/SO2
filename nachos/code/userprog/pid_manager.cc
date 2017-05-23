@@ -9,6 +9,24 @@ PidManager::PidManager(){
 PidManager::~PidManager(){
     delete Pids;
 }
-SpaceId AddPid(Thread* t);
-     Thread* GetThread(SpaceId);
-     void RemovePid(SpaceId);
+
+SpaceId
+PidManager::AddPid(Thread* t)
+{
+    Pids->SortedInsert(t,pid);
+    pid++;
+}
+
+Thread*
+PidManager::GetThread(SpaceId id)
+{
+    Thread* ret = Pids->SortedRemove(&id);
+    Pids->SortedInsert(ret,id);
+    return ret;
+}
+
+void
+PidManager::RemovePid(SpaceId id)
+{
+    Thread *aux = Pids->SortedRemove(&id);
+}

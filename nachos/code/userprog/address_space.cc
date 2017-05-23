@@ -80,12 +80,15 @@ AddressSpace::AddressSpace(OpenFile *executable)
           numPages, size);
 
     // First, set up the translation.
+    bitmap = new BitMap(NUM_PHYS_PAGES);
+   
 
     pageTable = new TranslationEntry[numPages];
     for (unsigned i = 0; i < numPages; i++) {
         pageTable[i].virtualPage  = i;
-          // For now, virtual page number = physical page number.
-        pageTable[i].physicalPage = i;
+          // For now, virtual page number = physical page number. NO MORE!
+        pageTable[i].physicalPage = bitmap->Find();
+        ASSERT(pageTable[i].physicalPage != -1);
         pageTable[i].valid        = true;
         pageTable[i].use          = false;
         pageTable[i].dirty        = false;

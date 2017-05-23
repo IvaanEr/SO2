@@ -25,6 +25,8 @@
 #include "syscall.h"
 #include "threads/system.hh"
 
+PidManager *pidmanager = new PidManager();
+
 void
 IncrementPC()
 {
@@ -185,14 +187,27 @@ ExceptionHandler(ExceptionType which)
             break;
             }
     
-          case SC_Exit:
+          case SC_Exit:{
              currentThread->returnValue = machine->ReadRegister(4);              
              currentThread->Finish();
              break;
+          }
 
-          case SC_Join:
+          case SC_Exec:
+          {
+            char name[128];
+            int r4 = machine->ReadRegister(4);
+            ReadStringFromUser(r4,name,128);
+            
+            Thread *t = new Thread(strdup(name),true);
+            SpaceId pid_hijo = pidmanager->AddPid(t);
+          }
+          case SC_Join:{
              pid_hijo = 
+             
+          }
 
+            
          default:
             printf("Unexpected user mode exception %d %d\n", which, type);
             ASSERT(false);
