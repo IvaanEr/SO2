@@ -188,8 +188,10 @@ ExceptionHandler(ExceptionType which)
           case SC_Exit:
              currentThread->returnValue = machine->ReadRegister(4);              
              currentThread->Finish();
-             //IncrementPC();
              break;
+
+          case SC_Join:
+             pid_hijo = 
 
          default:
             printf("Unexpected user mode exception %d %d\n", which, type);
