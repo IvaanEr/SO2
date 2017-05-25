@@ -16,7 +16,7 @@
 
 #include "filesys/file_system.hh"
 #include "machine/translation_entry.hh"
-
+#include <string.h> //to use bzero
 
 const unsigned USER_STACK_SIZE = 1024;  ///< Increase this as necessary!
 

@@ -24,7 +24,54 @@
 
 #include "syscall.h"
 #include "threads/system.hh"
+#include "args.cc"
 
+// Could be in another file, but we need to config the MakeFile
+
+class PidManager
+{
+    private:
+        List<Thread*> *Pids;
+        SpaceId pid = 1;
+    public:
+     PidManager();
+     ~PidManager();
+     SpaceId AddPid(Thread* t);
+     Thread* GetThread(SpaceId);
+     void RemovePid(SpaceId);
+};
+
+
+PidManager::PidManager(){
+    Pids = new List<Thread*>;
+    pid = 1;
+}
+
+PidManager::~PidManager(){
+    delete Pids;
+}
+
+SpaceId
+PidManager::AddPid(Thread* t)
+{
+    Pids->SortedInsert(t,pid);
+    pid++;
+}
+
+Thread*
+PidManager::GetThread(SpaceId id)
+{
+    Thread* ret = Pids->SortedRemove(&id);
+    Pids->SortedInsert(ret,id);
+    return ret;
+}
+
+void
+PidManager::RemovePid(SpaceId id)
+{
+    Thread *aux = Pids->SortedRemove(&id);
+}
+/////////////////////////////////////////////////////////////
 PidManager *pidmanager = new PidManager();
 
 void
@@ -38,6 +85,16 @@ IncrementPC()
   machine->WriteRegister(NEXT_PC_REG, pc);
 }
 
+void
+StartProc(void * args)
+{
+    currentThread->space->InitRegisters();
+    currentThread->space->RestoreState();
+
+    WriteArgs((char**)args);                   //funciona?
+
+    machine->Run();
+}
 //Machine::ReadMem(unsigned addr, unsigned size, int *value)
 void
 ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
@@ -193,17 +250,38 @@ ExceptionHandler(ExceptionType which)
              break;
           }
 
-          case SC_Exec:
+          case SC_Exec://SpaceId Exec(char *name, char **argv);
           {
             char name[128];
             int r4 = machine->ReadRegister(4);
             ReadStringFromUser(r4,name,128);
+            int r5 = machine->ReadRegister(5);
+            char **argv = SaveArgs(r5);
+
+            OpenFile *executable = fileSystem->Open(name);
             
+            if(!executable || !argv){
+                machine->WriteRegister(2,-1); //terminacion incorrecta
+                IncrementPC();
+                break;            
+            }
+           
+            AddressSpace *space = new AddressSpace(executable);
             Thread *t = new Thread(strdup(name),true);
+            t->space = space;
             SpaceId pid_hijo = pidmanager->AddPid(t);
+            
+            t->Fork(StartProc,(void*)argv);
+
+            machine->WriteRegister(2,pid_hijo);
+
+
           }
           case SC_Join:{
-             pid_hijo = 
+             SpaceId pid_hijo = machine->ReadRegister(4);
+             Thread *t        = pidmanager->GetThread(pid_hijo);
+             int ret = t -> Join();
+             machine->WriteRegister(2,ret);
              
           }
 

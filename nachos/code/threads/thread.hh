@@ -126,7 +126,7 @@ public:
     /// The thread is done executing.
     void Finish();
 
-    void Join();
+    int Join();
 
     /// Check if thread has overflowed its stack.
     void CheckOverflow();

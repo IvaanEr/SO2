@@ -12,14 +12,16 @@
 ///
 /// Copyright (c) 1992-1993 The Regents of the University of California.
 ///               2016-2017 Docentes de la Universidad Nacional de Rosario.
-/// All rights reserved.  See `copyright.h` for copyright notice and
+/// All rights reserved.  S ee `copyright.h` for copyright notice and
 /// limitation of liability and disclaimer of warranty provisions.
 
 
 #include "address_space.hh"
 #include "bin/noff.h"
 #include "threads/system.hh"
+#include "bitmap.hh"
 
+class BitMap;
 
 /// Do little endian to big endian conversion on the bytes in the object file
 /// header, in case the file was generated on a little endian machine, and we
@@ -79,9 +81,9 @@ AddressSpace::AddressSpace(OpenFile *executable)
     DEBUG('a', "Initializing address space, num pages %u, size %u\n",
           numPages, size);
 
-    // First, set up the translation.
-    bitmap = new BitMap(NUM_PHYS_PAGES);
-   
+ 
+    BitMap *bitmap = new BitMap(NUM_PHYS_PAGES);
+    // First, set up the translation.  
 
     pageTable = new TranslationEntry[numPages];
     for (unsigned i = 0; i < numPages; i++) {
@@ -95,8 +97,35 @@ AddressSpace::AddressSpace(OpenFile *executable)
         pageTable[i].readOnly     = false;
           // If the code segment was entirely on a separate page, we could
           // set its pages to be read-only.
+        bzero(&machine ->mainMemory[pageTable[i].physicalPage * PAGE_SIZE], PAGE_SIZE);
+    }
+    
+    for(int j=0;j<noffH.code.size;j++){
+        char c;
+        executable->ReadAt(&c,1,j+noffH.code.inFileAddr);
+        int viraddr = noffH.code.virtualAddr + j;
+        int vpn = viraddr / PAGE_SIZE;
+        int offset = viraddr % PAGE_SIZE;
+        int phispn = pageTable[vpn].physicalPage;
+        int paddr_start = phispn*PAGE_SIZE;
+        int phisaddr = paddr_start + offset;
+
+        machine->mainMemory[phisaddr] = c;
+
     }
 
+    for(int j = 0; j<noffH.initData.size;j++){
+        char c;
+        executable->ReadAt(&c,1,j+noffH.initData.inFileAddr);
+        int viraddr = noffH.initData.virtualAddr +j;
+        int vpn = viraddr / PAGE_SIZE;
+        int offset = viraddr % PAGE_SIZE;
+        int phispn = pageTable[vpn].physicalPage;
+        int paddr_start = phispn * PAGE_SIZE;
+        int phisaddr = paddr_start * offset;
+
+        machine->mainMemory[phisaddr] = c;
+    }
     // Zero out the entire address space, to zero the unitialized data
     // segment and the stack segment.
     memset(machine->mainMemory, 0, size);
