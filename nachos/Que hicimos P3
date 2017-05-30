@@ -1,0 +1,8 @@
+Hicimos:
+
+AddressSpace: los 2 "for" agregando a memoria fisica el sector de datos y el segmento de texto
+			  PidManager clase...
+			  Join
+			  Exec: creamos un address space, lo asociamos a un Pid y le cargamos el programa.
+
+			  
