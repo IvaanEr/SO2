@@ -55,7 +55,9 @@ SpaceId
 PidManager::AddPid(Thread* t)
 {
     Pids->SortedInsert(t,pid);
+    SpaceId pidOld = pid;
     pid++;
+    return pidOld;
 }
 
 Thread*

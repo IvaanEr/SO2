@@ -42,7 +42,7 @@ public:
     /// Initialize the hardware console device.
     Console(const char *readFile, const char *writeFile,
             VoidFunctionPtr readAvail, VoidFunctionPtr writeDone,
-            void* callArg);
+            void* callArg3);
 
     /// Clean up console emulation.
     ~Console();
@@ -77,6 +77,5 @@ public:
     char incoming;  ///< Contains the character to be read, if there is one
                     ///< available.  Otherwise contains EOF.
 };
-
 
 #endif  // CONSOLE_H
