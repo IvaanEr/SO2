@@ -73,7 +73,7 @@ ConsoleTest(const char *in, const char *out)
 {
     char ch;
 
-    console   = new Console(in, out, ReadAvail, WriteDone, 0);
+    console   = new SynchConsole(in, out, ReadAvail, WriteDone, 0);
     readAvail = new Semaphore("read avail", 0);
     writeDone = new Semaphore("write done", 0);
 

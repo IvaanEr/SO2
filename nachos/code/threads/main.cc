@@ -66,7 +66,7 @@
 #include "copyright.h"
 #include "utility.hh"
 #include "system.hh"
-
+#include "../userprog/SynchConsole.hh"
 
 // External functions used by this file.
 
@@ -123,6 +123,15 @@ main(int argc, char **argv)
             ASSERT(argc > 1);
             StartProcess(*(argv + 1));
             argCount = 2;
+            //Modificaciones para tener consola en procesos de usuario.
+            SynchConsole *synchConsole = new SynchConsole(NULL,NULL);
+            for (;;) {
+              char ch = synchConsole->GetChar();
+              synchConsole->PutChar(ch);  // Echo it! and wait for write to finish.
+              if (ch == 'q')
+                  return;  // If `q`, quit.
+            }
+
         } else if (!strcmp(*argv, "-c")) {  // Test the console.
             if (argc == 1)
                 ConsoleTest(NULL, NULL);

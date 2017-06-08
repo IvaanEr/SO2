@@ -207,8 +207,12 @@ ExceptionHandler(ExceptionType which)
             ReadBufferFromUser(r4,buff,size);
             
 						OpenFileId file_id = machine->ReadRegister(6);
-            if (file_id == 0){}
-						else if (file_id == 1){}
+            if (file_id == 0){
+            
+            }
+						else if (file_id == 1){
+            
+            }
 						else{
               OpenFile *f = currentThread->GetFile(file_id);
               if(f == NULL)

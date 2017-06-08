@@ -1,4 +1,4 @@
-#include "../thread/list.hh"
+#include "../threads/list.hh"
 #include "syscall.h"
 
 class PidManager
