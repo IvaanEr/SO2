@@ -126,10 +126,10 @@ main(int argc, char **argv)
             //Modificaciones para tener consola en procesos de usuario.
             SynchConsole *synchConsole = new SynchConsole(NULL,NULL);
             for (;;) {
-              char ch = synchConsole->GetChar();
-              synchConsole->PutChar(ch);  // Echo it! and wait for write to finish.
+              char ch = synchConsole->SynchGetChar();
+              synchConsole->SynchPutChar(ch);  // Echo it! and wait for write to finish.
               if (ch == 'q')
-                  return;  // If `q`, quit.
+                  return -1;  // If `q`, quit.
             }
 
         } else if (!strcmp(*argv, "-c")) {  // Test the console.

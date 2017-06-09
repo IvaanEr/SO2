@@ -1,4 +1,5 @@
 #include "../machine/console.hh"
+#include "../threads/synch.hh"
 
 class SynchConsole
 {
@@ -15,7 +16,7 @@ private:
 	Console *console;
 	static Semaphore *writeSem;
 	static Semaphore *readSem;
-  Lock *writeLock;
-  Lock *readLock;
-}
+  	Lock *writeLock;
+  	Lock *readLock;
+};
 

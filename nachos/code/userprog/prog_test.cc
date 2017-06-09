@@ -47,6 +47,7 @@ StartProcess(const char *filename)
 /// completes.
 
 static Console   *console;
+// static SynchConsole *synchConsole;
 static Semaphore *readAvail;
 static Semaphore *writeDone;
 
@@ -73,7 +74,7 @@ ConsoleTest(const char *in, const char *out)
 {
     char ch;
 
-    console   = new SynchConsole(in, out, ReadAvail, WriteDone, 0);
+    console   = new Console(in, out, ReadAvail, WriteDone, 0);
     readAvail = new Semaphore("read avail", 0);
     writeDone = new Semaphore("write done", 0);
 

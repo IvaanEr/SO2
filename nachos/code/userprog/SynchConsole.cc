@@ -1,5 +1,5 @@
 #include "SynchConsole.hh"
-#include "../threads/synch.hh"
+
 
 SynchConsole::SynchConsole(const char *readFile, const char *writeFile)
 {
@@ -32,7 +32,7 @@ SynchConsole::SynchConsoleReadDone(void* arg)
 }
 
 void
-SynchPutChar(char c)
+SynchConsole::SynchPutChar(char c)
 {
   writeLock->Acquire();
 
@@ -43,7 +43,7 @@ SynchPutChar(char c)
 }
 
 char
-SynchGetChar()
+SynchConsole::SynchGetChar()
 { 
   readLock->Acquire();
   
