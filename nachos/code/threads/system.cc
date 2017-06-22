@@ -35,7 +35,9 @@ SynchDisk *synchDisk;
 #endif
 
 #ifdef USER_PROGRAM  // Requires either *FILESYS* or *FILESYS_STUB*.
-Machine *machine;  ///< User program memory and registers.
+#include "../userprog/SynchConsole.hh"
+Machine *machine; ///< User program memory and registers.
+SynchConsole *synchConsole; 
 #endif
 
 #ifdef NETWORK
@@ -165,6 +167,8 @@ Initialize(int argc, char **argv)
     interrupt->Enable();
     CallOnUserAbort(Cleanup);  // If user hits ctl-C...
 
+    
+
     // Jose Miguel Santos Espino, 2007
     if (preemptiveScheduling) {
         preemptiveScheduler = new PreemptiveScheduler();
@@ -172,7 +176,12 @@ Initialize(int argc, char **argv)
     }
 
 #ifdef USER_PROGRAM
+
+  
     machine = new Machine(debugUserProg);  // This must come first.
+    //Inicializamos la consola
+    synchConsole = new SynchConsole(NULL,NULL);
+    
 #endif
 
 #ifdef FILESYS

@@ -144,8 +144,13 @@ ExceptionHandler(ExceptionType which)
         		OpenFileId file_id = machine->ReadRegister(6);
 						char *buffer = new char[128];
 
-            if (file_id == 0){}
-						else if (file_id == 1){}
+            if (file_id == 0){ //ConsoleInput
+              for(int i = 0; i < size; i++){
+                char c = synchConsole->SynchGetChar();
+            }
+						else if (file_id == 1){ //ConsoleOutput
+						
+						}
 						else{
 							OpenFile *f = currentThread->GetFile(file_id);
               if(f == NULL)
@@ -166,7 +171,7 @@ ExceptionHandler(ExceptionType which)
             
 						OpenFileId file_id = machine->ReadRegister(6);
             if (file_id == 0){
-            
+                          
             }
 						else if (file_id == 1){
             
