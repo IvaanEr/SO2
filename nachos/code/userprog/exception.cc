@@ -25,55 +25,8 @@
 #include "syscall.h"
 #include "threads/system.hh"
 #include "args.cc"
+#include "pid_manager.hh"
 
-// Could be in another file, but we need to config the MakeFile
-
-class PidManager
-{
-    private:
-        List<Thread*> *Pids;
-        SpaceId pid = 1;
-    public:
-     PidManager();
-     ~PidManager();
-     SpaceId AddPid(Thread* t);
-     Thread* GetThread(SpaceId);
-     void RemovePid(SpaceId);
-};
-
-
-PidManager::PidManager(){
-    Pids = new List<Thread*>;
-    pid = 1;
-}
-
-PidManager::~PidManager(){
-    delete Pids;
-}
-
-SpaceId
-PidManager::AddPid(Thread* t)
-{
-    Pids->SortedInsert(t,pid);
-    SpaceId pidOld = pid;
-    pid++;
-    return pidOld;
-}
-
-Thread*
-PidManager::GetThread(SpaceId id)
-{
-    Thread* ret = Pids->SortedRemove(&id);
-    Pids->SortedInsert(ret,id);
-    return ret;
-}
-
-void
-PidManager::RemovePid(SpaceId id)
-{
-    Thread *aux = Pids->SortedRemove(&id);
-}
-/////////////////////////////////////////////////////////////
 PidManager *pidmanager = new PidManager();
 
 void
@@ -97,6 +50,11 @@ StartProc(void * args)
 
     machine->Run();
 }
+
+#define READSTR(add,out,max) ReadStringFromUser(add,out,max)
+#define READBUFF(add,out,byteCount) ReadBufferFromUser(add,out,byteCount)
+#define WRITESTR(str,add) WriteStringToUser(str,add)
+#define WRITEBUFF(buff,add,byteCount) WriteBufferToUser(buff,add,byteCount)
 //Machine::ReadMem(unsigned addr, unsigned size, int *value)
 void
 ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
@@ -172,7 +130,7 @@ ExceptionHandler(ExceptionType which)
         	case SC_Create:
         		{char name[128];
         		int r4 = machine->ReadRegister(4);
-        		ReadStringFromUser(r4,name,128);
+        		READSTR(r4,name,128);
         		if(!(fileSystem->Create(name,0))){
               printf("Couldn't create the file %s\n", name);
             }
@@ -193,7 +151,7 @@ ExceptionHandler(ExceptionType which)
               if(f == NULL)
                 printf("The file doesn't exist \n");
 							int count = f->Read(buffer,size);
-              WriteBufferToUser(buffer,r4,size); 
+              WRITEBUFF(buffer,r4,size); 
               machine->WriteRegister(2,count);
 						}
             delete [] buffer;
@@ -204,7 +162,7 @@ ExceptionHandler(ExceptionType which)
            { int r4 = machine->ReadRegister(4);            
             int size = machine->ReadRegister(5);						
             char *buff = new char[size];
-            ReadBufferFromUser(r4,buff,size);
+            READBUFF(r4,buff,size);
             
 						OpenFileId file_id = machine->ReadRegister(6);
             if (file_id == 0){
@@ -226,7 +184,7 @@ ExceptionHandler(ExceptionType which)
           case SC_Open://OpenFileId Open(char *name);
             {char name[128];
             int r4 = machine->ReadRegister(4);
-            ReadStringFromUser(r4,name,128);            
+            READSTR(r4,name,128);            
             int returnReg = 2;
 
             OpenFile *file = fileSystem->Open(name);
@@ -260,7 +218,7 @@ ExceptionHandler(ExceptionType which)
           {
             char name[128];
             int r4 = machine->ReadRegister(4);
-            ReadStringFromUser(r4,name,128);
+            READSTR(r4,name,128);
             int r5 = machine->ReadRegister(5);
             char **argv = SaveArgs(r5);
 

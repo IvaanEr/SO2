@@ -123,14 +123,14 @@ main(int argc, char **argv)
             ASSERT(argc > 1);
             StartProcess(*(argv + 1));
             argCount = 2;
-            //Modificaciones para tener consola en procesos de usuario.
-            SynchConsole *synchConsole = new SynchConsole(NULL,NULL);
-            for (;;) {
-              char ch = synchConsole->SynchGetChar();
-              synchConsole->SynchPutChar(ch);  // Echo it! and wait for write to finish.
-              if (ch == 'q')
-                  return -1;  // If `q`, quit.
-            }
+            // //Modificaciones para tener consola en procesos de usuario.
+            // SynchConsole *synchConsole = new SynchConsole(NULL,NULL);
+            // for (;;) {
+            //   char ch = synchConsole->SynchGetChar();
+            //   synchConsole->SynchPutChar(ch);  // Echo it! and wait for write to finish.
+            //   if (ch == 'q')
+            //       return -1;  // If `q`, quit.
+            // }
 
         } else if (!strcmp(*argv, "-c")) {  // Test the console.
             if (argc == 1)

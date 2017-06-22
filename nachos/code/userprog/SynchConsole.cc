@@ -1,11 +1,11 @@
 #include "SynchConsole.hh"
 
+Semaphore *SynchConsole::writeSem = new Semaphore("writeSem",0);
+Semaphore *SynchConsole::readSem = new Semaphore("readSem",0);
 
 SynchConsole::SynchConsole(const char *readFile, const char *writeFile)
 {
-  console = new Console(readFile,writeFile,SynchConsole::SynchConsoleWriteDone,SynchConsole::SynchConsoleReadDone,0);
-  writeSem = new Semaphore("writeSem",0);
-  readSem = new Semaphore("readSem",0);
+  console = new Console(readFile,writeFile,SynchConsole::SynchConsoleReadDone,SynchConsole::SynchConsoleWriteDone,0);
   writeLock = new Lock("writeLock");
   readLock = new Lock("readLock");
 }
@@ -19,13 +19,13 @@ SynchConsole::~SynchConsole()
   delete readLock;
 }
 
-static void
+void
 SynchConsole::SynchConsoleWriteDone(void* arg)
 {
   writeSem -> V();
 }
 
-static void
+void
 SynchConsole::SynchConsoleReadDone(void* arg)
 {
   readSem -> V();
@@ -37,7 +37,7 @@ SynchConsole::SynchPutChar(char c)
   writeLock->Acquire();
 
   console->PutChar(c);
-  writeSem -> P();
+  writeSem->P();
 
   writeLock->Release();  
 }

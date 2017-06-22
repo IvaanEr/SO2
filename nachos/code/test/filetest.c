@@ -15,8 +15,9 @@
 int
 main(void)
 {
+	
     Create("test.txt");          //char buf[128]; Read(buff,128,fd); devuelve cuanto leyo efectivamnete...
-    OpenFileId o = Open("test.txt");
+    int o = Open("test.txt");
     Write("Hello world\n",12,o);
   // devuelve void.
     Close(o);

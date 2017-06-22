@@ -1,7 +1,8 @@
 #include "pid_manager.hh"
 
 
-PidManager::PidManager(){
+PidManager::PidManager()
+{
     Pids = new List<Thread*>;
     pid = 1;
 }
@@ -15,6 +16,7 @@ PidManager::AddPid(Thread* t)
 {
     Pids->SortedInsert(t,pid);
     pid++;
+    return pid;
 }
 
 Thread*
@@ -28,5 +30,5 @@ PidManager::GetThread(SpaceId id)
 void
 PidManager::RemovePid(SpaceId id)
 {
-    Thread *aux = Pids->SortedRemove(&id);
+    Pids->SortedRemove(&id);
 }

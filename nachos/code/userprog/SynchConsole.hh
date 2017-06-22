@@ -9,13 +9,13 @@ public:
 
 	static void SynchConsoleWriteDone(void*);
 	static void SynchConsoleReadDone(void*);
-  void SynchPutChar(char c);
-  char SynchGetChar();
+  	void SynchPutChar(char c);
+  	char SynchGetChar();
 
-private:
-	Console *console;
 	static Semaphore *writeSem;
 	static Semaphore *readSem;
+private:
+	Console *console;
   	Lock *writeLock;
   	Lock *readLock;
 };
