@@ -66,7 +66,7 @@
 #include "copyright.h"
 #include "utility.hh"
 #include "system.hh"
-#include "../userprog/SynchConsole.hh"
+// #include "../userprog/SynchConsole.hh"
 
 // External functions used by this file.
 

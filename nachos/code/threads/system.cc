@@ -35,7 +35,7 @@ SynchDisk *synchDisk;
 #endif
 
 #ifdef USER_PROGRAM  // Requires either *FILESYS* or *FILESYS_STUB*.
-#include "../userprog/SynchConsole.hh"
+// #include "../userprog/SynchConsole.hh"
 Machine *machine; ///< User program memory and registers.
 SynchConsole *synchConsole; 
 #endif

@@ -142,40 +142,44 @@ ExceptionHandler(ExceptionType which)
 						{int r4 = machine->ReadRegister(4);
             int size = machine->ReadRegister(5);
         		OpenFileId file_id = machine->ReadRegister(6);
-						char *buffer = new char[128];
-
-            if (file_id == 0){ //ConsoleInput
-              for(int i = 0; i < size; i++){
-                char c = synchConsole->SynchGetChar();
-            }
-						else if (file_id == 1){ //ConsoleOutput
 						
+            if (file_id == 0){ //ConsoleInput
+              char st[size+1];
+              int i;
+              for(i = 0; i < size; i++)
+                st[i] = synchConsole->SynchGetChar();
+              
+              st[i] = '\0';
+              WRITEBUFF(st,r4,i);
+              machine->WriteRegister(2,i);						
 						}
 						else{
-							OpenFile *f = currentThread->GetFile(file_id);
+						  char *buffer = new char[128];
+            	OpenFile *f = currentThread->GetFile(file_id);
               if(f == NULL)
                 printf("The file doesn't exist \n");
 							int count = f->Read(buffer,size);
               WRITEBUFF(buffer,r4,size); 
               machine->WriteRegister(2,count);
+              delete [] buffer;
 						}
-            delete [] buffer;
 						IncrementPC();
 						break;
             }
 					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
-           { int r4 = machine->ReadRegister(4);            
+           { int r4 = machine->ReadRegistePr(4);            
             int size = machine->ReadRegister(5);						
             char *buff = new char[size];
             READBUFF(r4,buff,size);
             
 						OpenFileId file_id = machine->ReadRegister(6);
-            if (file_id == 0){
-                          
+           
+						if (file_id == 1){
+              int i;
+              for(i = 0; i < size; i++)
+                synchConsole->SynchPutChar(buff[i]);
             }
-						else if (file_id == 1){
-            
-            }
+
 						else{
               OpenFile *f = currentThread->GetFile(file_id);
               if(f == NULL)
