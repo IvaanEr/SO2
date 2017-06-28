@@ -71,8 +71,8 @@ Thread::~Thread()
     ASSERT(this != currentThread);
     if (stack != NULL)
         DeallocBoundedArray((char *) stack, STACK_SIZE * sizeof *stack);
-    if(CanCallJoin)
-        delete puerto;
+//    if(CanCallJoin)
+//        delete puerto;
 }
 
 /// Invoke `(*func)(arg)`, allowing caller and callee to execute

@@ -92,7 +92,7 @@ WriteStringToUser(const char *string, int userAddress)
 void
 WriteBufferToUser(const char *buffer, int userAddress,unsigned byteCount)
 {
-	for (int i = 0; i< byteCount; i++)
+	for (unsigned i = 0; i< byteCount; i++)
 		ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
 }
 /// Entry point into the Nachos kernel.  Called when a user program is
@@ -138,20 +138,20 @@ ExceptionHandler(ExceptionType which)
 						break;
             }
         	case SC_Read://int Read(char *buffer, int size, OpenFileId id);
-            
-						{int r4 = machine->ReadRegister(4);
+          { 
+            int r4 = machine->ReadRegister(4);
             int size = machine->ReadRegister(5);
         		OpenFileId file_id = machine->ReadRegister(6);
 						
             if (file_id == 0){ //ConsoleInput
-              char st[size+1];
+              char st[size];
               int i;
               for(i = 0; i < size; i++)
                 st[i] = synchConsole->SynchGetChar();
               
-              st[i] = '\0';
-              WRITEBUFF(st,r4,i);
-              machine->WriteRegister(2,i);						
+            WRITEBUFF(st,r4,size);
+            machine->WriteRegister(2,i);
+
 						}
 						else{
 						  char *buffer = new char[128];
@@ -165,9 +165,9 @@ ExceptionHandler(ExceptionType which)
 						}
 						IncrementPC();
 						break;
-            }
+          }
 					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
-           { int r4 = machine->ReadRegistePr(4);            
+           { int r4 = machine->ReadRegister(4);            
             int size = machine->ReadRegister(5);						
             char *buff = new char[size];
             READBUFF(r4,buff,size);
@@ -229,17 +229,24 @@ ExceptionHandler(ExceptionType which)
             int r4 = machine->ReadRegister(4);
             READSTR(r4,name,128);
             int r5 = machine->ReadRegister(5);
-            char **argv = SaveArgs(r5);
-
-            OpenFile *executable = fileSystem->Open(name);
             
-            if(!executable || !argv){
+            char **argv = SaveArgs(r5);
+            if(!argv){
+                machine->WriteRegister(2,-1); //terminacion incorrecta
+                IncrementPC();
+                break;            
+            }
+            
+            OpenFile *executable = fileSystem->Open(name);
+            if(!executable){
                 machine->WriteRegister(2,-1); //terminacion incorrecta
                 IncrementPC();
                 break;            
             }
            
             AddressSpace *space = new AddressSpace(executable);
+            delete executable;
+
             Thread *t = new Thread(strdup(name),true);
             t->space = space;
             SpaceId pid_hijo = pidmanager->AddPid(t);
@@ -247,20 +254,21 @@ ExceptionHandler(ExceptionType which)
             t->Fork(StartProc,(void*)argv);
 
             machine->WriteRegister(2,pid_hijo);
-
-
+            IncrementPC();
+            break;
           }
           case SC_Join:{
              SpaceId pid_hijo = machine->ReadRegister(4);
              Thread *t        = pidmanager->GetThread(pid_hijo);
              int ret = t -> Join();
              machine->WriteRegister(2,ret);
-             
+             IncrementPC();
+             break;
           }
 
             
          default:
-            printf("Unexpected user mode exception %d %d\n", which, type);
+            printf("Unexpected user mode exception Default %d %d\n", which, type);
             ASSERT(false);
         }
     } else {

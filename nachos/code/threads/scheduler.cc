@@ -64,6 +64,7 @@ Scheduler::FindNextToRun()
     for (int i = PRIORITY_MAX-1; i >= 0; i--)
       if (!(readyList[i].IsEmpty()))
         return readyList[i].Remove();
+    return NULL;
 }
 
 /// Dispatch the CPU to `nextThread`.

@@ -90,7 +90,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
         pageTable[i].virtualPage  = i;
           // For now, virtual page number = physical page number. NO MORE!
         pageTable[i].physicalPage = bitmap->Find();
-        ASSERT(pageTable[i].physicalPage != -1);
+        ASSERT((int)pageTable[i].physicalPage != -1);
         pageTable[i].valid        = true;
         pageTable[i].use          = false;
         pageTable[i].dirty        = false;
@@ -117,33 +117,33 @@ AddressSpace::AddressSpace(OpenFile *executable)
     for(int j = 0; j<noffH.initData.size;j++){
         char c;
         executable->ReadAt(&c,1,j+noffH.initData.inFileAddr);
-        int viraddr = noffH.initData.virtualAddr +j;
+        int viraddr = noffH.initData.virtualAddr + j;
         int vpn = viraddr / PAGE_SIZE;
         int offset = viraddr % PAGE_SIZE;
         int phispn = pageTable[vpn].physicalPage;
         int paddr_start = phispn * PAGE_SIZE;
-        int phisaddr = paddr_start * offset;
+        int phisaddr = paddr_start + offset;
 
         machine->mainMemory[phisaddr] = c;
     }
     // Zero out the entire address space, to zero the unitialized data
     // segment and the stack segment.
-    memset(machine->mainMemory, 0, size);
+    // memset(machine->mainMemory, 0, size);
 
-    // Then, copy in the code and data segments into memory.
-    if (noffH.code.size > 0) {
-        DEBUG('a', "Initializing code segment, at 0x%X, size %u\n",
-              noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
-                           noffH.code.size, noffH.code.inFileAddr);
-    }
-    if (noffH.initData.size > 0) {
-        DEBUG('a', "Initializing data segment, at 0x%X, size %u\n",
-              noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(
-          &(machine->mainMemory[noffH.initData.virtualAddr]),
-          noffH.initData.size, noffH.initData.inFileAddr);
-    }
+    // // Then, copy in the code and data segments into memory.
+    // if (noffH.code.size > 0) {
+    //     DEBUG('a', "Initializing code segment, at 0x%X, size %u\n",
+    //           noffH.code.virtualAddr, noffH.code.size);
+    //     executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
+    //                        noffH.code.size, noffH.code.inFileAddr);
+    // }
+    // if (noffH.initData.size > 0) {
+    //     DEBUG('a', "Initializing data segment, at 0x%X, size %u\n",
+    //           noffH.initData.virtualAddr, noffH.initData.size);
+    //     executable->ReadAt(
+    //       &(machine->mainMemory[noffH.initData.virtualAddr]),
+    //       noffH.initData.size, noffH.initData.inFileAddr);
+    // }
 
 }
 
