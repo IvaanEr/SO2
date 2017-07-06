@@ -120,10 +120,10 @@ main(void)
         const SpaceId newProc = Exec(line, argv);
         // TO DO: check for errors when calling `Exec`; this depends on how
         //        errors are reported.
-        // if(newProc == -1){
-        //     WriteError("Exec error.",OUTPUT);
-        //     continue;
-        // }
+        if(newProc == -1){
+            WriteError("Exec error.",OUTPUT);
+            continue;
+        }
 
         int ret = Join(newProc);
         // TO DO: is it necessary to check for errors after `Join` too, or

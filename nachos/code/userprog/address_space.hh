@@ -17,6 +17,9 @@
 #include "filesys/file_system.hh"
 #include "machine/translation_entry.hh"
 #include <string.h> //to use bzero
+#include "bitmap.hh"
+
+class BitMap;
 
 const unsigned USER_STACK_SIZE = 1024;  ///< Increase this as necessary!
 
@@ -40,6 +43,7 @@ public:
 
     void SaveState();
     void RestoreState();
+    static BitMap *bitmap;
 
 private:
 

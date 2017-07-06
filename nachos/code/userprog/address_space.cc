@@ -19,10 +19,8 @@
 #include "address_space.hh"
 #include "bin/noff.h"
 #include "threads/system.hh"
-#include "bitmap.hh"
 
-class BitMap;
-
+BitMap *AddressSpace::bitmap = new BitMap(NUM_PHYS_PAGES);
 /// Do little endian to big endian conversion on the bytes in the object file
 /// header, in case the file was generated on a little endian machine, and we
 /// are re now running on a big endian machine.
@@ -82,7 +80,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
           numPages, size);
 
  
-    BitMap *bitmap = new BitMap(NUM_PHYS_PAGES);
+    // BitMap *bitmap = new BitMap(NUM_PHYS_PAGES);
     // First, set up the translation.  
 
     pageTable = new TranslationEntry[numPages];
