@@ -70,6 +70,9 @@ public:
     /// Remove first item from list.
     Item SortedRemove(int *keyPtr);
 
+    Item RemoveItem(Item item);
+
+    Item Find(int key);
 private:
 
     typedef ListElement<Item> ListNode;
@@ -259,5 +262,49 @@ List<Item>::SortedRemove(int *keyPtr)
     return thing;
 }
 
+template <class Item>
+Item
+List<Item>::RemoveItem(Item item)
+{
+
+    ListNode *element = first;
+
+    if(IsEmpty())
+        return Item();
+
+    ListNode *node = element;
+    while(element != NULL && element->item != item){
+        node = element;
+        element = element->next;
+    }
+
+    if(element == NULL)
+        return Item();
+    else if (element == first){
+        first = first->next;
+    }
+    else{
+        node->next = element->next;
+    }
+    if(last == element)
+        last = node;
+
+    return element->item;
+}
+
+template <class Item>
+Item List<Item>::Find(int key)
+{
+    ListNode *elem = first;
+    
+    while(elem != NULL && elem->key != key){
+        elem = elem->next;
+    }
+    
+    if(elem == NULL){
+        return Item();
+    }
+    else return elem->item;
+}
 
 #endif

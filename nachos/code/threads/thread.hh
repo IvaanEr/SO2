@@ -55,7 +55,7 @@ typedef struct Pair_{
 	OpenFile* file;
 } Pair;
 */
-
+class Lock;
 class Puerto;
 /// CPU register state to be saved on context switch.
 ///
@@ -104,7 +104,7 @@ private:
 public:
 
     /// Initialize a `Thread`.
-    Thread(const char *debugName, bool JoinCall = true, int actual_priority = 0);
+    Thread(const char *debugName, bool JoinCall = false, int actual_priority = 0);
 
     /// Deallocate a Thread.
     ///
@@ -151,12 +151,14 @@ public:
     int OldPriority; //priority
     int ActualPriority;
 
+    // OpenFileId , OpenFile* association
+
 
     OpenFileId AddFile(OpenFile* openFile);
 
     OpenFile *GetFile(OpenFileId id);
 
-    void RemoveFile(OpenFileId id);
+    void RemoveFile(OpenFile* file);
 
 private:
     // Some of the private data for this class is listed above.
@@ -176,6 +178,7 @@ private:
     bool CanCallJoin;
     
     //used for openfiles association
+    Lock *lock;
     OpenFileId id;
     List<OpenFile*> *OpenFiles;
 

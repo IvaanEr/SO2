@@ -151,7 +151,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
 AddressSpace::~AddressSpace()
 {
     delete [] pageTable;
-}
+} 
 
 /// Set the initial values for the user-level register set.
 ///

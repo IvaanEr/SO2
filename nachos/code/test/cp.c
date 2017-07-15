@@ -5,7 +5,7 @@ int
 main(int argc, char **argv)
 {
 	if(argc != 3){
-		Write("Syntax Error.",13,ConsoleOutput);
+		Write("Syntax Error -cp- \n",19,ConsoleOutput);
 	}
 	
 	OpenFileId source  = Open(argv[1]);

@@ -41,12 +41,12 @@ IncrementPC()
 }
 
 void
-StartProc(void * args)
+StartProc(void *args)
 {
+    WriteArgs((char**)args); 
     currentThread->space->InitRegisters();
     currentThread->space->RestoreState();
-
-    WriteArgs((char**)args);                   //funciona?
+                      //funciona?
 
     machine->Run();
 }
@@ -55,6 +55,7 @@ StartProc(void * args)
 #define READBUFF(add,out,byteCount) ReadBufferFromUser(add,out,byteCount)
 #define WRITESTR(str,add) WriteStringToUser(str,add)
 #define WRITEBUFF(buff,add,byteCount) WriteBufferToUser(buff,add,byteCount)
+
 //Machine::ReadMem(unsigned addr, unsigned size, int *value)
 void
 ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
@@ -157,7 +158,7 @@ ExceptionHandler(ExceptionType which)
 						  char *buffer = new char[128];
             	OpenFile *f = currentThread->GetFile(file_id);
               if(f == NULL)
-                printf("The file doesn't exist \n");
+                printf("The file doesn't exist [Read] \n");
 							int count = f->Read(buffer,size);
               WRITEBUFF(buffer,r4,size); 
               machine->WriteRegister(2,count);
@@ -167,9 +168,11 @@ ExceptionHandler(ExceptionType which)
 						break;
           }
 					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
-           { int r4 = machine->ReadRegister(4);            
+           {
+            int r4 = machine->ReadRegister(4);            
             int size = machine->ReadRegister(5);						
             char *buff = new char[size];
+            
             READBUFF(r4,buff,size);
             
 						OpenFileId file_id = machine->ReadRegister(6);
@@ -183,7 +186,7 @@ ExceptionHandler(ExceptionType which)
 						else{
               OpenFile *f = currentThread->GetFile(file_id);
               if(f == NULL)
-                 printf("The file doesn't exist \n");
+                 printf("The file doesn't exist [Write]\n");
               f->Write(buff,size);
             }
             delete [] buff;
@@ -191,9 +194,12 @@ ExceptionHandler(ExceptionType which)
             break;
             }
           case SC_Open://OpenFileId Open(char *name);
-            {char name[128];
+            {
+            char *name = new char[128];
+
             int r4 = machine->ReadRegister(4);
-            READSTR(r4,name,128);            
+            READSTR(r4,name,128);
+            printf("Name - r4 : %s\n",name);            
             int returnReg = 2;
 
             OpenFile *file = fileSystem->Open(name);
@@ -202,23 +208,28 @@ ExceptionHandler(ExceptionType which)
 
             OpenFileId id = currentThread->AddFile(file);
             machine->WriteRegister(returnReg,id);
+            delete name;
+
             IncrementPC();
             break;
             }
+
+
           case SC_Close: //void Close(OpenFileId id);
             {OpenFileId id = machine->ReadRegister(4);
             OpenFile *file = currentThread->GetFile(id);
             if(file != NULL){ //OpenFile() //chequeamos que el archivo existe
-              currentThread->RemoveFile(id);
+              currentThread->RemoveFile(file);
               delete file;
             }
-            else printf("The file doesn't exist\n");
+            else printf("The file doesn't exist [Close]\n");
             IncrementPC();
             break;
             }
     
           case SC_Exit:{
-             currentThread->returnValue = machine->ReadRegister(4);              
+             currentThread->returnValue = machine->ReadRegister(4);
+             pidmanager->RemovePid(currentThread);              
              currentThread->Finish();
              break;
           }
@@ -231,6 +242,7 @@ ExceptionHandler(ExceptionType which)
             int r5 = machine->ReadRegister(5);
             
             char **argv = SaveArgs(r5);
+            
             if(!argv){
                 machine->WriteRegister(2,-1); //terminacion incorrecta
                 IncrementPC();
@@ -247,20 +259,22 @@ ExceptionHandler(ExceptionType which)
             AddressSpace *space = new AddressSpace(executable);
             delete executable;
 
-            Thread *t = new Thread(strdup(name),true);
+            Thread *t = new Thread(strdup(name),true); // new joinable thread
             t->space = space;
-            SpaceId pid_hijo = pidmanager->AddPid(t);
             
-            t->Fork(StartProc,(void*)argv);
-
+            SpaceId pid_hijo = pidmanager->AddPid(t);
             machine->WriteRegister(2,pid_hijo);
+            
+            t->Fork(StartProc,(void *)argv);
+
+            
             IncrementPC();
             break;
           }
           case SC_Join:{
              SpaceId pid_hijo = machine->ReadRegister(4);
              Thread *t        = pidmanager->GetThread(pid_hijo);
-             int ret = t -> Join();
+             int ret          = t -> Join();
              machine->WriteRegister(2,ret);
              IncrementPC();
              break;

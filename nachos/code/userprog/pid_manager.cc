@@ -5,6 +5,7 @@ PidManager::PidManager()
 {
     Pids = new List<Thread*>;
     pid = 1;
+    lock = new Lock("PidManager Lock");
 }
 
 PidManager::~PidManager(){
@@ -14,23 +15,27 @@ PidManager::~PidManager(){
 SpaceId
 PidManager::AddPid(Thread* t)
 {
+    lock->Acquire();
+
     Pids->SortedInsert(t,pid);
-    
     int aux = pid;
     pid++;
+
+    lock->Release();
     return aux;
 }
 
 Thread*
 PidManager::GetThread(SpaceId id)
 {
-    Thread* ret = Pids->SortedRemove(&id);
-    Pids->SortedInsert(ret,id);
+    Thread* ret = Pids->Find(id);
+    ASSERT(ret != NULL);
     return ret;
 }
 
 void
-PidManager::RemovePid(SpaceId id)
+PidManager::RemovePid(Thread* t)
 {
-    Pids->SortedRemove(&id);
+    if(t != NULL)
+    Pids->RemoveItem(t);
 }

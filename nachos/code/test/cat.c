@@ -2,7 +2,8 @@
 
 int main(int argc, char ** argv){
 	if(argc != 2){
-		Write("Syntax Error.",13,ConsoleOutput);
+		Write("Syntax Error -cat-\n",19,ConsoleOutput);
+		Exit(-1);
 	}
 	OpenFileId source = Open(argv[1]);
 	char c;

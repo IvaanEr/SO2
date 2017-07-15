@@ -15,11 +15,20 @@
 int
 main(void)
 {
-	
-    Create("test.txt");          //char buf[128]; Read(buff,128,fd); devuelve cuanto leyo efectivamnete...
+	char c[128];
+
+    Create("test.txt");
+    Create("test2.txt");          //char buf[128]; Read(buff,128,fd); devuelve cuanto leyo efectivamnete...
     int o = Open("test.txt");
+    int a = Open("test2.txt");
     Write("Hello world\n",12,o);
-  // devuelve void.
+  	Write("Hola\n",5,a);
+  	
+	Write("Chauuu\n",7,o);
+  	Write("Chauuu\n",7,a);
+  	// devuelve void.
     Close(o);
+    Close(a);
+    Exit(0);
     // Not reached.
 }

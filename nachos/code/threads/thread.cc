@@ -19,7 +19,7 @@
 
 #include "thread.hh"
 #include "switch.h"
-#include "synch.hh"
+//#include "synch.hh"
 #include "system.hh"
 
 
@@ -44,6 +44,8 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
     
     OpenFiles = new List<OpenFile *>; 
     id = 2;  //comienza en 2 porque el id 0 y 1 esta asociado a la Consola
+    lock = new Lock("OpenFile Lock");
+   
     if(JoinCall)
         puerto = new Puerto("JoinPort");
     else
@@ -162,6 +164,8 @@ Thread::Finish()
 int
 Thread::Join()
 {
+    //printf("thread: %s",currentThread->name);
+    DEBUG('t',"Thread calling join: \"%s\"\n",currentThread->name);
     ASSERT(CanCallJoin);
     int aux;
     puerto -> Receive(&aux);
@@ -233,34 +237,35 @@ Thread::Sleep()
     scheduler->Run(nextThread);  // Returns when we have been signalled.
 }
 
-// void Thread::Join(){
-//     ASSERT(CanCAllJoin);
-//     int *buff;
-//     p->Receive(buff);
-// }
 
 //OpenFiles methods
 OpenFileId
 Thread::AddFile(OpenFile *openFile)
 {
+    lock->Acquire();
+
     OpenFiles->SortedInsert(openFile,id);
     OpenFileId oldId = id;
     id++;
+    
+    lock->Release();
+
     return oldId;
 }
 
 OpenFile*
 Thread::GetFile(OpenFileId file_id)
 {
-    OpenFile *f = OpenFiles->SortedRemove(&file_id);
-    OpenFiles->SortedInsert(f,file_id);
-    return f;
+    OpenFile* file = OpenFiles->Find(file_id);
+    // ASSERT(file != NULL);
+    return file;
 }
 
 void
-Thread::RemoveFile(OpenFileId file_id)
+Thread::RemoveFile(OpenFile* file)
 {
-    OpenFile *f = OpenFiles->SortedRemove(&file_id);
+    if(file != NULL)
+        OpenFile *f = OpenFiles->RemoveItem(file);
 }
 
 
