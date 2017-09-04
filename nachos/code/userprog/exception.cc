@@ -1,4 +1,4 @@
-/// Entry point into the Nachos kernel from user programs.
+  /// Entry point into the Nachos kernel from user programs.
 ///
 /// There are two kinds of things that can cause control to transfer back to
 /// here from user code:
@@ -43,11 +43,10 @@ IncrementPC()
 void
 StartProc(void *args)
 {
-    WriteArgs((char**)args); 
+    
     currentThread->space->InitRegisters();
     currentThread->space->RestoreState();
-                      //funciona?
-
+    WriteArgs((char**)args);
     machine->Run();
 }
 
@@ -64,10 +63,17 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 	unsigned i=0;
 	
 	do{
-			ASSERT(machine->ReadMem(userAddress+i,1,&c));
+     printf("ESTOY EN ReadStringFromUser - 0\n");
+
+			machine->ReadMem(userAddress+i,1,&c);
+     printf("ESTOY EN ReadStringFromUser - 1-%d c = %c\n",i,c);
 			outString[i] = c;
 			i++;
+     printf("ESTOY EN ReadStringFromUser - 2-%d\n",i);
+
 		} while(c != 0 && i<maxByteCount);
+    printf("ESTOY EN ReadStringFromUser - 1\n");
+
 }
 
 void
@@ -199,7 +205,7 @@ ExceptionHandler(ExceptionType which)
 
             int r4 = machine->ReadRegister(4);
             READSTR(r4,name,128);
-            printf("Name - r4 : %s\n",name);            
+             // printf("Name - r4 : %s\n",name);            
             int returnReg = 2;
 
             OpenFile *file = fileSystem->Open(name);
@@ -236,12 +242,16 @@ ExceptionHandler(ExceptionType which)
 
           case SC_Exec://SpaceId Exec(char *name, char **argv);
           {
+            printf("ESTOY EN EL EXEC - 1\n");
             char name[128];
+            
             int r4 = machine->ReadRegister(4);
             READSTR(r4,name,128);
             int r5 = machine->ReadRegister(5);
+            printf("ESTOY EN EL EXEC - 2\n");
             
             char **argv = SaveArgs(r5);
+            printf("ESTOY EN EL EXEC - 3\n");
             
             if(!argv){
                 machine->WriteRegister(2,-1); //terminacion incorrecta
@@ -287,7 +297,7 @@ ExceptionHandler(ExceptionType which)
         }
     } else {
         printf("Unexpected user mode exception %d %d\n", which, type);
-        ASSERT(false);
+      
     }
 }
 

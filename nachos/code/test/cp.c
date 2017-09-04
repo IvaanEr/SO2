@@ -9,7 +9,7 @@ main(int argc, char **argv)
 	}
 	
 	OpenFileId source  = Open(argv[1]);
-	Create(argv[2]); // el filesys que usamos, que hace si ya existe?
+	//Create(argv[2]); // el filesys que usamos, que hace si ya existe?
 	OpenFileId destiny = Open(argv[2]);
 
 	char c;

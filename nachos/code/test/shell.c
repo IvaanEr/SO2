@@ -20,7 +20,7 @@ strlen(const char *s)
 static inline void
 WritePrompt(OpenFileId output)
 {
-    static const char PROMPT[] = "--> ";
+    static const char PROMPT[] = "NachOS> ";
     Write(PROMPT, sizeof PROMPT - 1, output);
 }
 
