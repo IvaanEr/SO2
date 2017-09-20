@@ -58,7 +58,7 @@ char **
 SaveArgs(int address)
 {
     ASSERT(address != 0);
-    printf("ESTOY EN SaveArgs - 1\n");
+    DEBUG('p', "ESTOY EN SaveArgs - 1\n");
 
     // Count the number of arguments up to NULL.
     int val;
@@ -67,32 +67,33 @@ SaveArgs(int address)
         machine->ReadMem(address + i * 4, 4, &val);
         i++;
     } while (i < MAX_ARG_COUNT && val != 0);
-    printf("ESTOY EN SaveArgs - 2\n");
+    DEBUG('p', "ESTOY EN SaveArgs - 2\n");
 
     if (i == MAX_ARG_COUNT && val != 0)
         // The maximum number of arguments was reached but the last is not
         // NULL.  Return NULL as error.
         return NULL;
-    printf("ESTOY EN SaveArgs - 3\n");
+    DEBUG('p', "ESTOY EN SaveArgs - 3\n");
 
     DEBUG('e', "Saving %u command line arguments from parent process.\n", i);
 
     char **ret = new char * [i];  // Allocate an array of `i` pointers. We
                                   // know that `i` will always be at least 1.
-    printf("ESTOY EN SaveArgs - 4\n");
+    DEBUG('p', "ESTOY EN SaveArgs - 4\n");
 
     for (unsigned j = 0; j < i - 1; j++) {
         // For each pointer, read the corresponding string.
-            printf("ESTOY EN SaveArgs - for: %d\n",j);
+            DEBUG('p', "ESTOY EN SaveArgs - for: %d\n",j);
 
         ret[j] = new char [MAX_ARG_LENGTH];
-        printf("ESTOY EN SaveArgs - jeje\n");
+        DEBUG('p', "ESTOY EN SaveArgs - jeje\n");
         machine->ReadMem(address + j * 4, 4, &val);
-        printf("ESTOY EN SaveArgs - address: %d - val: %d\n",address,val);
+        DEBUG('p', "ESTOY EN SaveArgs - address: %d - val: %d\n",address,val);
         ReadStringFromUser(val, ret[j], MAX_ARG_LENGTH);
-        printf("ESTOY EN SaveArgs - petefor: %d\n",j);
+        DEBUG('p', "ESTOY EN SaveArgs - petefor: %d\n",j);
 
     }
+    DEBUG ('p', "SALI DEL FOR\n");
     ret[i - 1] = NULL;  // Write the trailing NULL.
 
     return ret;

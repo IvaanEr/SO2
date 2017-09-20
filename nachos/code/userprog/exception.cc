@@ -63,16 +63,16 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 	unsigned i=0;
 	
 	do{
-     printf("ESTOY EN ReadStringFromUser - 0\n");
+     DEBUG('p', "ESTOY EN ReadStringFromUser - 0\n");
 
 			machine->ReadMem(userAddress+i,1,&c);
-     printf("ESTOY EN ReadStringFromUser - 1-%d c = %c\n",i,c);
+     DEBUG('p', "ESTOY EN ReadStringFromUser - 1-%d c = %c\n",i,c);
 			outString[i] = c;
 			i++;
-     printf("ESTOY EN ReadStringFromUser - 2-%d\n",i);
+     DEBUG('p', "ESTOY EN ReadStringFromUser - 2-%d\n",i);
 
 		} while(c != 0 && i<maxByteCount);
-    printf("ESTOY EN ReadStringFromUser - 1\n");
+     DEBUG('p', "ESTOY EN ReadStringFromUser - 1\n");
 
 }
 
@@ -242,16 +242,16 @@ ExceptionHandler(ExceptionType which)
 
           case SC_Exec://SpaceId Exec(char *name, char **argv);
           {
-            printf("ESTOY EN EL EXEC - 1\n");
+            DEBUG('p', "ESTOY EN EL EXEC - 1\n");
             char name[128];
             
             int r4 = machine->ReadRegister(4);
             READSTR(r4,name,128);
             int r5 = machine->ReadRegister(5);
-            printf("ESTOY EN EL EXEC - 2\n");
+            DEBUG('p', "ESTOY EN EL EXEC - 2\n");
             
             char **argv = SaveArgs(r5);
-            printf("ESTOY EN EL EXEC - 3\n");
+            DEBUG('p', "ESTOY EN EL EXEC - 3\n");
             
             if(!argv){
                 machine->WriteRegister(2,-1); //terminacion incorrecta
@@ -261,6 +261,7 @@ ExceptionHandler(ExceptionType which)
             
             OpenFile *executable = fileSystem->Open(name);
             if(!executable){
+                DEBUG('p', "NO EJECUTABLE");
                 machine->WriteRegister(2,-1); //terminacion incorrecta
                 IncrementPC();
                 break;            

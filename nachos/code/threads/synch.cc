@@ -112,29 +112,33 @@ Lock::IsHeldByCurrentThread()
 void
 Lock::Acquire()
 {
-  ASSERT(!(IsHeldByCurrentThread()));
-  if (hold_name != NULL){
-    int HolderPriority = hold_name -> ActualPriority;
-    if (HolderPriority > currentThread->ActualPriority){
-      DEBUG('s',"Realice inversion de prioridades con %s y %s\n",hold_name->getName(),currentThread->getName());
-      hold_name -> ActualPriority = currentThread->ActualPriority;
-      hold_name -> OldPriority = HolderPriority;
-    }
-  }
-        
-  sem -> P(); 
-  hold_name = currentThread;
+  //ASSERT(!(IsHeldByCurrentThread())); //antes estaba esto en lugar del if
+  if((!IsHeldByCurrentThread())){    
+      if (hold_name != NULL){
+        int HolderPriority = hold_name -> ActualPriority;
+        if (HolderPriority > currentThread->ActualPriority){
+          DEBUG('s',"Realice inversion de prioridades con %s y %s\n",hold_name->getName(),currentThread->getName());
+          hold_name -> ActualPriority = currentThread->ActualPriority;
+          hold_name -> OldPriority = HolderPriority;
+        }
+      }
+                
+      sem -> P(); 
+      hold_name = currentThread;
+  }        
 }
 
 void
 Lock::Release()
 {
-  ASSERT(IsHeldByCurrentThread());
-  
-  hold_name -> ActualPriority = hold_name -> OldPriority;
+  //ASSERT(IsHeldByCurrentThread()); //antes estaba esto en lugar del if
+  if (IsHeldByCurrentThread()){
+    hold_name -> ActualPriority = hold_name -> OldPriority;
 
-  sem -> V();
-  hold_name = NULL;
+    sem -> V();
+    hold_name = NULL;
+  }
+ 
 }
 
 
