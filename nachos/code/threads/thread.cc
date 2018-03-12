@@ -19,7 +19,7 @@
 
 #include "thread.hh"
 #include "switch.h"
-//#include "synch.hh"
+#include "synch.hh"
 #include "system.hh"
 
 

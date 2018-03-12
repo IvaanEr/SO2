@@ -9,7 +9,6 @@
 #include "system.hh"
 #include "preemptive.hh"
 
-
 /// This defines *all* of the global data structures used by Nachos.
 ///
 /// These are all initialized and de-allocated by this file.
@@ -21,6 +20,8 @@ Interrupt *interrupt;         ///< Interrupt status.
 Statistics *stats;            ///< Performance metrics.
 Timer *timer;                 ///< The hardware timer device, for invoking
                               ///< context switches.
+
+
 
 // 2007, Jose Miguel Santos Espino
 PreemptiveScheduler *preemptiveScheduler = NULL;
@@ -36,8 +37,10 @@ SynchDisk *synchDisk;
 
 #ifdef USER_PROGRAM  // Requires either *FILESYS* or *FILESYS_STUB*.
 // #include "../userprog/SynchConsole.hh"
-Machine *machine; ///< User program memory and registers.
-SynchConsole *synchConsole; 
+Machine *machine;  ///< User program memory and registers.
+SynchConsole *synchConsole;
+PidManager *pidManager;
+
 #endif
 
 #ifdef NETWORK
@@ -181,7 +184,7 @@ Initialize(int argc, char **argv)
     machine = new Machine(debugUserProg);  // This must come first.
     //Inicializamos la consola
     synchConsole = new SynchConsole(NULL,NULL);
-    
+    pidManager = new PidManager();
 #endif
 
 #ifdef FILESYS

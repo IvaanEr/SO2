@@ -25,9 +25,6 @@
 #include "syscall.h"
 #include "threads/system.hh"
 #include "args.cc"
-#include "pid_manager.hh"
-
-PidManager *pidmanager = new PidManager();
 
 void
 IncrementPC()
@@ -63,16 +60,16 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 	unsigned i=0;
 	
 	do{
-     DEBUG('p', "ESTOY EN ReadStringFromUser - 0\n");
+    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 0\n");
 
 			machine->ReadMem(userAddress+i,1,&c);
-     DEBUG('p', "ESTOY EN ReadStringFromUser - 1-%d c = %c\n",i,c);
+    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 1-%d c = %c\n",i,c);
 			outString[i] = c;
 			i++;
-     DEBUG('p', "ESTOY EN ReadStringFromUser - 2-%d\n",i);
+    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 2-%d\n",i);
 
-		} while(c != 0 && i<maxByteCount);
-     DEBUG('p', "ESTOY EN ReadStringFromUser - 1\n");
+		} while(c != '\0' && i<maxByteCount);
+    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 1\n");
 
 }
 
@@ -235,12 +232,12 @@ ExceptionHandler(ExceptionType which)
     
           case SC_Exit:{
              currentThread->returnValue = machine->ReadRegister(4);
-             pidmanager->RemovePid(currentThread);              
+             pidManager->RemovePid(currentThread);              
              currentThread->Finish();
              break;
           }
 
-          case SC_Exec://SpaceId Exec(char *name, char **argv);
+          case SC_Exec: //SpaceId Exec(char *name, char **argv);
           {
             DEBUG('p', "ESTOY EN EL EXEC - 1\n");
             char name[128];
@@ -270,21 +267,21 @@ ExceptionHandler(ExceptionType which)
             AddressSpace *space = new AddressSpace(executable);
             delete executable;
 
-            Thread *t = new Thread(strdup(name),true); // new joinable thread
+            Thread *t = new Thread(strdup(name), true, 9); // new joinable thread
             t->space = space;
             
-            SpaceId pid_hijo = pidmanager->AddPid(t);
+            SpaceId pid_hijo = pidManager->AddPid(t);
             machine->WriteRegister(2,pid_hijo);
             
             t->Fork(StartProc,(void *)argv);
-
+            
             
             IncrementPC();
             break;
           }
           case SC_Join:{
              SpaceId pid_hijo = machine->ReadRegister(4);
-             Thread *t        = pidmanager->GetThread(pid_hijo);
+             Thread *t        = pidManager->GetThread(pid_hijo);
              int ret          = t -> Join();
              machine->WriteRegister(2,ret);
              IncrementPC();

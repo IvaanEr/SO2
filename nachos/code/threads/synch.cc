@@ -112,8 +112,7 @@ Lock::IsHeldByCurrentThread()
 void
 Lock::Acquire()
 {
-  //ASSERT(!(IsHeldByCurrentThread())); //antes estaba esto en lugar del if
-  if((!IsHeldByCurrentThread())){    
+  ASSERT(!(IsHeldByCurrentThread())); //antes estaba esto en lugar del if
       if (hold_name != NULL){
         int HolderPriority = hold_name -> ActualPriority;
         if (HolderPriority > currentThread->ActualPriority){
@@ -121,24 +120,19 @@ Lock::Acquire()
           hold_name -> ActualPriority = currentThread->ActualPriority;
           hold_name -> OldPriority = HolderPriority;
         }
-      }
-                
+      }        
       sem -> P(); 
       hold_name = currentThread;
-  }        
 }
 
 void
 Lock::Release()
 {
-  //ASSERT(IsHeldByCurrentThread()); //antes estaba esto en lugar del if
-  if (IsHeldByCurrentThread()){
+    ASSERT(IsHeldByCurrentThread()); //antes estaba esto en lugar del if
     hold_name -> ActualPriority = hold_name -> OldPriority;
 
     sem -> V();
-    hold_name = NULL;
-  }
- 
+    hold_name = NULL; 
 }
 
 
