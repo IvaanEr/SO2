@@ -31,16 +31,16 @@ WriteArgs(char **args)
 
     sp -= sp % 4;     // Align the stack to a multiple of four.
     sp -= i * 4 + 4;  // Make room for the array and the trailing NULL.
-    
+
     // Agrego...
     int argv = sp;
     //...
-    
+
     for (unsigned j = 0; j < i; j++)
         // Save the address of the j-th argument counting from the end down
         // to the beginning.
         machine->WriteMem(sp + 4 * j, 4, args_address[j]);
-    
+
     machine->WriteMem(sp + 4 * i, 4, 0);  // The last is NULL.
     sp -= 16;  // Make room for the “register saves”.
 
@@ -50,7 +50,7 @@ WriteArgs(char **args)
     machine->WriteRegister(4,i);
     machine->WriteRegister(5,argv);
     // ...
-   
+
     delete args;  // Free the array.
 }
 
@@ -89,7 +89,7 @@ SaveArgs(int address)
         // DEBUG('p', "ESTOY EN SaveArgs - jeje\n");
         machine->ReadMem(address + j * 4, 4, &val);
         DEBUG('p', "ESTOY EN SaveArgs - address: %d - val: %d\n",address,val);
-        ReadStringFromUser(address, ret[j], MAX_ARG_LENGTH);
+        ReadStringFromUser(val, ret[j], MAX_ARG_LENGTH);
         DEBUG('p', "ESTOY EN SaveArgs - petefor: %d\n",j);
 
     }

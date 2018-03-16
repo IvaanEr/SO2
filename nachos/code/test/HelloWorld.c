@@ -2,7 +2,7 @@
 
 int main() {
     char **argv = {"hola", 0};
-    Exec("../test/hola", argv);
-    Exec("../test/hola", argv);
-    Exit(0);
+    int pid = Exec("../test/hola", argv);
+    Join(pid);
+    // Exit(0);
 }

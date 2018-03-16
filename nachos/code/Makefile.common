@@ -51,7 +51,8 @@ THREAD_H = ../threads/copyright.h   \
            ../machine/system_dep.hh \
            ../machine/statistics.hh \
            ../machine/timer.hh      \
-           ../threads/preemptive.hh
+           ../threads/preemptive.hh \
+           ../threads/pidManager.hh
 THREAD_C = ../threads/main.cc        \
            ../threads/scheduler.cc   \
            ../threads/synch.cc       \
@@ -63,7 +64,8 @@ THREAD_C = ../threads/main.cc        \
            ../machine/system_dep.cc  \
            ../machine/statistics.cc  \
            ../machine/timer.cc       \
-           ../threads/preemptive.cc
+           ../threads/preemptive.cc  \
+           ../threads/pidManager.cc
 THREAD_S = ../threads/switch.s
 THREAD_O = main.o        \
            scheduler.o   \
@@ -76,7 +78,8 @@ THREAD_O = main.o        \
            statistics.o  \
            system_dep.o  \
            timer.o       \
-           preemptive.o
+           preemptive.o  \
+           pidManager.o
 
 USERPROG_H = ../userprog/address_space.hh \
              ../userprog/bitmap.hh        \
@@ -88,8 +91,7 @@ USERPROG_H = ../userprog/address_space.hh \
              ../machine/instruction.hh    \
              ../machine/machine.hh        \
              ../machine/translation_entry.hh \
-             ../userprog/SynchConsole.hh \
-             ../userprog/pid_manager.hh
+             ../userprog/SynchConsole.hh
 USERPROG_C = ../userprog/address_space.cc \
              ../userprog/bitmap.cc        \
              ../userprog/exception.cc     \
@@ -101,8 +103,7 @@ USERPROG_C = ../userprog/address_space.cc \
              ../machine/machine.cc        \
              ../machine/mips_sim.cc       \
              ../machine/translate.cc      \
-             ../userprog/SynchConsole.cc  \
-             ../userprog/pid_manager.cc
+             ../userprog/SynchConsole.cc
 USERPROG_O = address_space.o \
              bitmap.o        \
              exception.o     \
@@ -114,9 +115,8 @@ USERPROG_O = address_space.o \
              machine.o       \
              mips_sim.o      \
              translate.o     \
-             SynchConsole.o  \
-             pid_manager.o
-             
+             SynchConsole.o
+
 
 VMEM_H =
 VMEM_C =

@@ -1,13 +1,13 @@
-#include "../threads/list.hh"
 #include "../threads/thread.hh"
 #include "syscall.h"
 #include "synch.hh"
 
+#define MAX_NUMBER_PROC 10
+
 class PidManager
 {
     private:
-        List<Thread*> *Pids;
-        SpaceId pid;
+        Thread *table[MAX_NUMBER_PROC];
         Lock *lock;
     public:
      PidManager();

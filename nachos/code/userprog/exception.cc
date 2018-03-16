@@ -40,7 +40,6 @@ IncrementPC()
 void
 StartProc(void *args)
 {
-    
     currentThread->space->InitRegisters();
     currentThread->space->RestoreState();
     WriteArgs((char**)args);
@@ -58,13 +57,13 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 {
 	int c;
 	unsigned i=0;
-	
+
 	do{
     //  DEBUG('p', "ESTOY EN ReadStringFromUser - 0\n");
 
 			machine->ReadMem(userAddress+i,1,&c);
     //  DEBUG('p', "ESTOY EN ReadStringFromUser - 1-%d c = %c\n",i,c);
-			outString[i] = c;
+			outString[i] = (char) c;
 			i++;
     //  DEBUG('p', "ESTOY EN ReadStringFromUser - 2-%d\n",i);
 
@@ -81,7 +80,7 @@ ReadBufferFromUser(int userAddress, char *outBuffer,unsigned byteCount)
 
 	for(i = 0; i<byteCount; i++){
 		ASSERT(machine->ReadMem(userAddress+i,1,&c));
-		outBuffer[i] = c;
+		outBuffer[i] = (char) c;
 	}
 }
 
@@ -124,13 +123,13 @@ ExceptionHandler(ExceptionType which)
 
     if (which == SYSCALL_EXCEPTION) {
         switch(type){
-        	
+
         	case SC_Halt:
 		        DEBUG('a', "Shutdown, initiated by user program.\n");
 		        interrupt->Halt();
 		        IncrementPC();
-		        break;        			
-        	
+		        break;
+
         	case SC_Create:
         		{char name[128];
         		int r4 = machine->ReadRegister(4);
@@ -142,17 +141,17 @@ ExceptionHandler(ExceptionType which)
 						break;
             }
         	case SC_Read://int Read(char *buffer, int size, OpenFileId id);
-          { 
+          {
             int r4 = machine->ReadRegister(4);
             int size = machine->ReadRegister(5);
         		OpenFileId file_id = machine->ReadRegister(6);
-						
+
             if (file_id == 0){ //ConsoleInput
               char st[size];
               int i;
               for(i = 0; i < size; i++)
                 st[i] = synchConsole->SynchGetChar();
-              
+
             WRITEBUFF(st,r4,size);
             machine->WriteRegister(2,i);
 
@@ -163,7 +162,7 @@ ExceptionHandler(ExceptionType which)
               if(f == NULL)
                 printf("The file doesn't exist [Read] \n");
 							int count = f->Read(buffer,size);
-              WRITEBUFF(buffer,r4,size); 
+              WRITEBUFF(buffer,r4,size);
               machine->WriteRegister(2,count);
               delete [] buffer;
 						}
@@ -172,14 +171,14 @@ ExceptionHandler(ExceptionType which)
           }
 					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
            {
-            int r4 = machine->ReadRegister(4);            
-            int size = machine->ReadRegister(5);						
+            int r4 = machine->ReadRegister(4);
+            int size = machine->ReadRegister(5);
             char *buff = new char[size];
-            
+
             READBUFF(r4,buff,size);
-            
+
 						OpenFileId file_id = machine->ReadRegister(6);
-           
+
 						if (file_id == 1){
               int i;
               for(i = 0; i < size; i++)
@@ -202,7 +201,7 @@ ExceptionHandler(ExceptionType which)
 
             int r4 = machine->ReadRegister(4);
             READSTR(r4,name,128);
-             // printf("Name - r4 : %s\n",name);            
+            printf("Name - r4 : %s\n",name);
             int returnReg = 2;
 
             OpenFile *file = fileSystem->Open(name);
@@ -229,53 +228,57 @@ ExceptionHandler(ExceptionType which)
             IncrementPC();
             break;
             }
-    
+
           case SC_Exit:{
              currentThread->returnValue = machine->ReadRegister(4);
-             pidManager->RemovePid(currentThread);              
+             // Ojo con esto. Si removemos currentThread los ejecutables
+             // andan solamente lanzados desde shell.
+             pidManager->RemovePid(currentThread);
              currentThread->Finish();
              break;
           }
 
           case SC_Exec: //SpaceId Exec(char *name, char **argv);
           {
-            DEBUG('p', "ESTOY EN EL EXEC - 1\n");
+            // DEBUG('p', "ESTOY EN EL EXEC - 1\n");
+            printf("ESTOY EN EL EXEC\n");
             char name[128];
-            
+
             int r4 = machine->ReadRegister(4);
             READSTR(r4,name,128);
             int r5 = machine->ReadRegister(5);
-            DEBUG('p', "ESTOY EN EL EXEC - 2\n");
-            
+            // DEBUG('p', "ESTOY EN EL EXEC - 2\n");
+
             char **argv = SaveArgs(r5);
-            DEBUG('p', "ESTOY EN EL EXEC - 3\n");
-            
+            // DEBUG('p', "ESTOY EN EL EXEC - 3\n");
+
             if(!argv){
                 machine->WriteRegister(2,-1); //terminacion incorrecta
                 IncrementPC();
-                break;            
+                break;
             }
-            
+
             OpenFile *executable = fileSystem->Open(name);
             if(!executable){
-                DEBUG('p', "NO EJECUTABLE");
+                printf("NO EXECUTABLE\n");
+                // DEBUG('p', "NO EJECUTABLE");
                 machine->WriteRegister(2,-1); //terminacion incorrecta
                 IncrementPC();
-                break;            
+                break;
             }
-           
+
             AddressSpace *space = new AddressSpace(executable);
             delete executable;
 
             Thread *t = new Thread(strdup(name), true, 9); // new joinable thread
             t->space = space;
-            
+
             SpaceId pid_hijo = pidManager->AddPid(t);
             machine->WriteRegister(2,pid_hijo);
-            
+
             t->Fork(StartProc,(void *)argv);
-            
-            
+
+
             IncrementPC();
             break;
           }
@@ -288,14 +291,13 @@ ExceptionHandler(ExceptionType which)
              break;
           }
 
-            
+
          default:
             printf("Unexpected user mode exception Default %d %d\n", which, type);
             ASSERT(false);
         }
     } else {
         printf("Unexpected user mode exception %d %d\n", which, type);
-      
+
     }
 }
-

@@ -6,9 +6,10 @@ int main(int argc, char ** argv){
 		Exit(-1);
 	}
 	OpenFileId source = Open(argv[1]);
+  Write("12345",5,ConsoleOutput);
 	char c;
 
-	while(Read(&c, 1, source)){
+  while(Read(&c, 1, source)){
 		Write(&c,1,ConsoleOutput);
 	}
 	Close(source);

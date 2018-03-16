@@ -1,41 +1,60 @@
-#include "pid_manager.hh"
+#include "pidManager.hh"
 
 
 PidManager::PidManager()
 {
-    Pids = new List<Thread*>;
-    pid = 1;
-    lock = new Lock("PidManager Lock");
+  lock = new Lock("PidManager Lock");
 }
 
 PidManager::~PidManager(){
-    delete Pids;
+  delete lock;
 }
 
 SpaceId
-PidManager::AddPid(Thread* t)
+PidManager::AddPid(Thread* process)
 {
+    int res = -1;
+
     lock->Acquire();
 
-    Pids->SortedInsert(t,pid);
-    int aux = pid;
-    pid++;
+    for(int i=0; i<MAX_NUMBER_PROC; i++){
+      if(table[i]==NULL){
+          table[i]=process;
+          res = i;
+          break;
+      }
+    }
 
     lock->Release();
-    return aux;
+
+    return res;
 }
 
 Thread*
 PidManager::GetThread(SpaceId id)
 {
-    Thread* ret = Pids->Find(id);
-    ASSERT(ret != NULL);
-    return ret;
+  if (id >= 0 && id < MAX_NUMBER_PROC) {
+    ASSERT(table[id] != NULL);
+    return table[id];
+  }
+  else
+    ASSERT(false);
+    return NULL;
 }
 
 void
-PidManager::RemovePid(Thread* t)
+PidManager::RemovePid(Thread* process)
 {
-    if(t != NULL)
-    Pids->RemoveItem(t);
+    int i;
+     
+    lock -> Acquire();
+    for(i=0; i<MAX_NUMBER_PROC; i++){
+      if(table[i]==process){
+        table[i] = NULL;
+        break;
+      }
+    }
+    if(i==MAX_NUMBER_PROC)
+      ASSERT(false);
+    lock -> Release();
 }
