@@ -2,7 +2,7 @@
 #include "syscall.h"
 #include "synch.hh"
 
-#define MAX_NUMBER_PROC 10
+#define MAX_NUMBER_PROC 100
 
 class PidManager
 {

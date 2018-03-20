@@ -26,27 +26,29 @@ PidManager::AddPid(Thread* process)
     }
 
     lock->Release();
-
+    printf("RES : %d\n", res);
     return res;
 }
 
 Thread*
 PidManager::GetThread(SpaceId id)
 {
+  printf("ID : %d\n", id);
   if (id >= 0 && id < MAX_NUMBER_PROC) {
     ASSERT(table[id] != NULL);
     return table[id];
   }
-  else
+  else{
     ASSERT(false);
     return NULL;
+  }
 }
 
 void
 PidManager::RemovePid(Thread* process)
 {
     int i;
-     
+
     lock -> Acquire();
     for(i=0; i<MAX_NUMBER_PROC; i++){
       if(table[i]==process){

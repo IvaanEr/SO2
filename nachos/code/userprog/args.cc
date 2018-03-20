@@ -88,9 +88,7 @@ SaveArgs(int address)
         ret[j] = new char [MAX_ARG_LENGTH];
         // DEBUG('p', "ESTOY EN SaveArgs - jeje\n");
         machine->ReadMem(address + j * 4, 4, &val);
-        DEBUG('p', "ESTOY EN SaveArgs - address: %d - val: %d\n",address,val);
         ReadStringFromUser(val, ret[j], MAX_ARG_LENGTH);
-        DEBUG('p', "ESTOY EN SaveArgs - petefor: %d\n",j);
 
     }
     // DEBUG ('p', "SALI DEL FOR\n");

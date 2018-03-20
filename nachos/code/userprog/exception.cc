@@ -26,6 +26,13 @@
 #include "threads/system.hh"
 #include "args.cc"
 
+#define MAX_LONG_NAME 128
+
+#define READSTR(add,out,max) ReadStringFromUser(add,out,max)
+#define READBUFF(add,out,byteCount) ReadBufferFromUser(add,out,byteCount)
+#define WRITESTR(str,add) WriteStringToUser(str,add)
+#define WRITEBUFF(buff,add,byteCount) WriteBufferToUser(buff,add,byteCount)
+
 void
 IncrementPC()
 {
@@ -46,11 +53,6 @@ StartProc(void *args)
     machine->Run();
 }
 
-#define READSTR(add,out,max) ReadStringFromUser(add,out,max)
-#define READBUFF(add,out,byteCount) ReadBufferFromUser(add,out,byteCount)
-#define WRITESTR(str,add) WriteStringToUser(str,add)
-#define WRITEBUFF(buff,add,byteCount) WriteBufferToUser(buff,add,byteCount)
-
 //Machine::ReadMem(unsigned addr, unsigned size, int *value)
 void
 ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
@@ -59,17 +61,10 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 	unsigned i=0;
 
 	do{
-    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 0\n");
-
 			machine->ReadMem(userAddress+i,1,&c);
-    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 1-%d c = %c\n",i,c);
 			outString[i] = (char) c;
 			i++;
-    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 2-%d\n",i);
-
 		} while(c != '\0' && i<maxByteCount);
-    //  DEBUG('p', "ESTOY EN ReadStringFromUser - 1\n");
-
 }
 
 void
@@ -80,7 +75,7 @@ ReadBufferFromUser(int userAddress, char *outBuffer,unsigned byteCount)
 
 	for(i = 0; i<byteCount; i++){
 		ASSERT(machine->ReadMem(userAddress+i,1,&c));
-		outBuffer[i] = (char) c;
+		outBuffer[i] = c;
 	}
 }
 
@@ -88,16 +83,20 @@ ReadBufferFromUser(int userAddress, char *outBuffer,unsigned byteCount)
 void
 WriteStringToUser(const char *string, int userAddress)
 {
-	for (int i = 0; string[i] != 0; i++)
-		ASSERT(machine->WriteMem(userAddress+i, 1, string[i])); //me fijo que sea distinto de 0 o de '\0'??????
+  unsigned i=0;
+  do {
+		ASSERT(machine->WriteMem(userAddress+i, 1, string[i]));
+    i++;
+  } while(string[i-1] != '\0'); // Primero copio y después comparo para no dejar afuera al terminador
 }
 
 void
 WriteBufferToUser(const char *buffer, int userAddress,unsigned byteCount)
 {
-	for (unsigned i = 0; i< byteCount; i++)
+	for (unsigned i = 0; i < byteCount; i++)
 		ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
 }
+
 /// Entry point into the Nachos kernel.  Called when a user program is
 /// executing, and either does a syscall, or generates an addressing or
 /// arithmetic exception.
@@ -125,179 +124,193 @@ ExceptionHandler(ExceptionType which)
         switch(type){
 
         	case SC_Halt:
-		        DEBUG('a', "Shutdown, initiated by user program.\n");
+          {
+		        DEBUG('p', "Shutdown, initiated by user program.\n");
 		        interrupt->Halt();
-		        IncrementPC();
 		        break;
-
+          }
         	case SC_Create:
-        		{char name[128];
-        		int r4 = machine->ReadRegister(4);
-        		READSTR(r4,name,128);
-        		if(!(fileSystem->Create(name,0))){
-              printf("Couldn't create the file %s\n", name);
+      		{
+            char name[MAX_LONG_NAME];
+        		int nameReg = machine->ReadRegister(4); // Leo el nombre que viene en registro
+        		READSTR(nameReg, name, MAX_LONG_NAME);
+
+        		if(fileSystem -> Create(name,0)){
+              DEBUG('p', "New file: %s\n", name);
+            } else {
+              DEBUG('p', "Error while creating file: %s\n", name);
             }
-            IncrementPC();
+
 						break;
-            }
+          }
         	case SC_Read://int Read(char *buffer, int size, OpenFileId id);
           {
-            int r4 = machine->ReadRegister(4);
-            int size = machine->ReadRegister(5);
-        		OpenFileId file_id = machine->ReadRegister(6);
+            int user_buffer = machine -> ReadRegister(4);
+            int size = machine -> ReadRegister(5);
+        		OpenFileId file_id = machine -> ReadRegister(6);
 
-            if (file_id == 0){ //ConsoleInput
-              char st[size];
-              int i;
-              for(i = 0; i < size; i++)
-                st[i] = synchConsole->SynchGetChar();
+            char my_buffer[size];
 
-            WRITEBUFF(st,r4,size);
-            machine->WriteRegister(2,i);
+            if (file_id == 0) { //ConsoleInput
+              // DEBUG('p', "Reading from console...");
 
+              for(int i = 0; i < size; i++) {
+                my_buffer[i] = synchConsole->SynchGetChar();
+              }
+
+              WRITEBUFF(my_buffer, user_buffer, size);
+              machine->WriteRegister(2,size); // Devuelvo la cantidad de bytes leídos
+            } else {
+            	OpenFile *file = currentThread->GetFile(file_id);
+
+              if(file) {
+  							int readBytes = file -> Read(my_buffer,size);
+                DEBUG('p', "Reading %d bytes from file id: %d\n", readBytes, file_id);
+                WRITEBUFF(my_buffer,user_buffer,readBytes);
+                machine->WriteRegister(2,readBytes);
+              }
+              else {
+                DEBUG('p', "[Error] Trying to read from invalid file id: %d\n", file_id);
+                machine->WriteRegister(2,-1); // Devuelvo -1 para indicar el error
+              }
 						}
-						else{
-						  char *buffer = new char[128];
-            	OpenFile *f = currentThread->GetFile(file_id);
-              if(f == NULL)
-                printf("The file doesn't exist [Read] \n");
-							int count = f->Read(buffer,size);
-              WRITEBUFF(buffer,r4,size);
-              machine->WriteRegister(2,count);
-              delete [] buffer;
-						}
-						IncrementPC();
 						break;
           }
 					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
-           {
-            int r4 = machine->ReadRegister(4);
+          {
+            int user_buffer = machine->ReadRegister(4);
             int size = machine->ReadRegister(5);
-            char *buff = new char[size];
-
-            READBUFF(r4,buff,size);
-
 						OpenFileId file_id = machine->ReadRegister(6);
 
+            char my_buffer[size];
+
+            READBUFF(user_buffer, my_buffer, size);
+
+
 						if (file_id == 1){
-              int i;
-              for(i = 0; i < size; i++)
-                synchConsole->SynchPutChar(buff[i]);
-            }
+              // DEBUG('p', "Writing to console...");
 
-						else{
-              OpenFile *f = currentThread->GetFile(file_id);
-              if(f == NULL)
-                 printf("The file doesn't exist [Write]\n");
-              f->Write(buff,size);
+              for(int i = 0; i < size; i++)
+                synchConsole -> SynchPutChar(my_buffer[i]);
+
+            } else {
+              OpenFile *file = currentThread -> GetFile(file_id);
+              if(file) {
+                DEBUG('p', "Writing %d bytes from file id: %d\n", size, file_id);
+
+                file -> Write(my_buffer, size);
+              } else {
+                DEBUG('p', "[Error] Trying to invalid file id: %d\n", file_id);
+              }
             }
-            delete [] buff;
-            IncrementPC();
             break;
-            }
+          }
           case SC_Open://OpenFileId Open(char *name);
-            {
-            char *name = new char[128];
+          {
+            int nameReg = machine -> ReadRegister(4);
+            char name[MAX_LONG_NAME];
 
-            int r4 = machine->ReadRegister(4);
-            READSTR(r4,name,128);
-            printf("Name - r4 : %s\n",name);
-            int returnReg = 2;
+            READSTR(nameReg, name, MAX_LONG_NAME);
 
-            OpenFile *file = fileSystem->Open(name);
-            if(file == NULL)
-              printf("Could not open the file %s\n",name);
+            OpenFile *file = fileSystem -> Open(name);
 
-            OpenFileId id = currentThread->AddFile(file);
-            machine->WriteRegister(returnReg,id);
-            delete name;
-
-            IncrementPC();
-            break;
+            if(file) {
+              DEBUG('p', "Opening file: %s\n", name);
+              OpenFileId file_id = currentThread->AddFile(file);
+              machine->WriteRegister(2,file_id);
+            } else {
+              DEBUG('p', "[Error] Could not open file: %s\n", name);
+              machine->WriteRegister(2,-1);
             }
+
+            break;
+          }
+
+          ///////////////////////////////////
+          // REVISE HASTA ACA
+          //////////////////////////////////
 
 
           case SC_Close: //void Close(OpenFileId id);
-            {OpenFileId id = machine->ReadRegister(4);
-            OpenFile *file = currentThread->GetFile(id);
-            if(file != NULL){ //OpenFile() //chequeamos que el archivo existe
+          {
+            OpenFileId file_id = machine->ReadRegister(4);
+            OpenFile *file = currentThread->GetFile(file_id);
+            if(file) { //OpenFile() //chequeamos que el archivo existe
+              DEBUG('p', "Closing file with id: %d\n", file_id);
               currentThread->RemoveFile(file);
               delete file;
-            }
-            else printf("The file doesn't exist [Close]\n");
-            IncrementPC();
+            } else
+              DEBUG('p', "[Error] Could not close file with id: %d\n", file_id);
             break;
-            }
+          }
 
-          case SC_Exit:{
-             currentThread->returnValue = machine->ReadRegister(4);
+          case SC_Exit:
+          {
+             int end_code = machine -> ReadRegister(4);
+             DEBUG('p', "Process exiting with status code: %d\n", end_code);
+             currentThread -> returnValue = end_code;
              // Ojo con esto. Si removemos currentThread los ejecutables
-             // andan solamente lanzados desde shell.
-             pidManager->RemovePid(currentThread);
-             currentThread->Finish();
+             // andan solamente lanzados desde shell, porque ahí se ejecutan con Fork.
+             pidManager -> RemovePid(currentThread);
+             currentThread -> Finish();
              break;
           }
 
           case SC_Exec: //SpaceId Exec(char *name, char **argv);
           {
-            // DEBUG('p', "ESTOY EN EL EXEC - 1\n");
-            printf("ESTOY EN EL EXEC\n");
-            char name[128];
+            char name[MAX_LONG_NAME];
+            int nameReg = machine->ReadRegister(4);
+            int argsAdress = machine->ReadRegister(5);
 
-            int r4 = machine->ReadRegister(4);
-            READSTR(r4,name,128);
-            int r5 = machine->ReadRegister(5);
-            // DEBUG('p', "ESTOY EN EL EXEC - 2\n");
+            READSTR(nameReg, name, MAX_LONG_NAME);
 
-            char **argv = SaveArgs(r5);
-            // DEBUG('p', "ESTOY EN EL EXEC - 3\n");
+            OpenFile *exe = fileSystem->Open(name);
 
-            if(!argv){
-                machine->WriteRegister(2,-1); //terminacion incorrecta
-                IncrementPC();
-                break;
+
+            if (exe) {
+              char **argv = SaveArgs(argsAdress);
+              ASSERT(argv); // Chequeo que haya argumentos
+
+              AddressSpace *exe_space = new AddressSpace(exe);
+              Thread *exe_thread = new Thread(strdup(name), true, 9);
+              exe_thread -> space = exe_space;
+
+              SpaceId pid_hijo = pidManager->AddPid(exe_thread);
+              DEBUG('p', "Executing binary %s with id %d\n", name, pid_hijo);
+              machine->WriteRegister(2, pid_hijo);
+              exe_thread -> Fork(StartProc,(void *)argv);
+            } else {
+              DEBUG('p', "[Error] Could not open executable: %s\n", name);
+              machine->WriteRegister(2, -1);
             }
 
-            OpenFile *executable = fileSystem->Open(name);
-            if(!executable){
-                printf("NO EXECUTABLE\n");
-                // DEBUG('p', "NO EJECUTABLE");
-                machine->WriteRegister(2,-1); //terminacion incorrecta
-                IncrementPC();
-                break;
-            }
-
-            AddressSpace *space = new AddressSpace(executable);
-            delete executable;
-
-            Thread *t = new Thread(strdup(name), true, 9); // new joinable thread
-            t->space = space;
-
-            SpaceId pid_hijo = pidManager->AddPid(t);
-            machine->WriteRegister(2,pid_hijo);
-
-            t->Fork(StartProc,(void *)argv);
-
-
-            IncrementPC();
             break;
           }
-          case SC_Join:{
-             SpaceId pid_hijo = machine->ReadRegister(4);
-             Thread *t        = pidManager->GetThread(pid_hijo);
-             int ret          = t -> Join();
-             machine->WriteRegister(2,ret);
-             IncrementPC();
+
+          case SC_Join:
+          {
+             SpaceId pid_hijo = machine -> ReadRegister(4);
+             Thread *t        = pidManager -> GetThread(pid_hijo);
+
+             if (t) {
+               DEBUG('p', "Joining process %d \n", pid_hijo);
+               int end_code     = t -> Join();
+               machine -> WriteRegister(2, end_code);
+             } else {
+               DEBUG('p', "[Error] Could not join process %d\n", pid_hijo);
+               machine -> WriteRegister(2, -1);
+             }
+
              break;
           }
 
-
          default:
-            printf("Unexpected user mode exception Default %d %d\n", which, type);
+            printf("Unexpected type of syscall exception %d %d\n", which, type);
             ASSERT(false);
         }
     } else {
         printf("Unexpected user mode exception %d %d\n", which, type);
-
+        // ASSERT(false);
     }
+    IncrementPC();
 }

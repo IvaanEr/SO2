@@ -4,4 +4,4 @@ cd ..
 make
 cd -
 
-./nachos -x ../test/shell
+./nachos -d p -x ../test/shell
