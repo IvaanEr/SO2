@@ -1,6 +1,8 @@
 #include "syscall.h"
 
 int main() {
-    char **argv = {"hola"};
-    int pid = Exec("../test/hola", argv);
+    char **args = {"../test/hola", 0};
+    int pid = Exec("../test/hola", args);
+    Join(pid);
+    Exit(450);
 }

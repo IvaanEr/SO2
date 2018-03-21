@@ -120,19 +120,19 @@ Lock::Acquire()
           hold_name -> ActualPriority = currentThread->ActualPriority;
           hold_name -> OldPriority = HolderPriority;
         }
-      }        
-      sem -> P(); 
+      }
+      sem -> P();
       hold_name = currentThread;
 }
 
 void
 Lock::Release()
 {
-    ASSERT(IsHeldByCurrentThread()); //antes estaba esto en lugar del if
+    ASSERT(IsHeldByCurrentThread()); 
     hold_name -> ActualPriority = hold_name -> OldPriority;
 
     sem -> V();
-    hold_name = NULL; 
+    hold_name = NULL;
 }
 
 
@@ -173,9 +173,9 @@ Condition::Signal()
 {
     Semaphore *s;
     ASSERT(lock->IsHeldByCurrentThread());
-    
+
     (lock->hold_name)->ActualPriority = (lock->hold_name)->OldPriority;
-    
+
     if(!sleep_queue->IsEmpty()){
       s = sleep_queue->Remove();
       s->V();
@@ -208,7 +208,7 @@ Puerto::~Puerto(){
 void
 Puerto::Send(int mensaje){
   lock -> Acquire();
-  
+
   while(!IsEmpty)
     empty -> Wait();
 
@@ -222,11 +222,10 @@ void
 Puerto::Receive(int *mensaje){
   lock -> Acquire();
   while(IsEmpty)
-    full-> Wait();  
+    full-> Wait();
 
   *mensaje = buff;
   IsEmpty = true;
   empty -> Signal();
   lock -> Release();
 }
-

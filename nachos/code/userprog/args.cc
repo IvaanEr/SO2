@@ -33,7 +33,9 @@ WriteArgs(char **args)
     sp -= i * 4 + 4;  // Make room for the array and the trailing NULL.
 
     // Agrego...
-    int argv = sp;
+    machine->WriteRegister(4,i);
+    machine->WriteRegister(5,sp);
+    // int argv = sp;
     //...
 
     for (unsigned j = 0; j < i; j++)
@@ -47,8 +49,6 @@ WriteArgs(char **args)
     machine->WriteRegister(STACK_REG, sp);
 
     // Agrego...
-    machine->WriteRegister(4,i);
-    machine->WriteRegister(5,argv);
     // ...
 
     delete args;  // Free the array.

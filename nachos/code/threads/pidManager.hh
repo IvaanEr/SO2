@@ -15,4 +15,7 @@ class PidManager
      SpaceId AddPid(Thread* t);
      Thread* GetThread(SpaceId);
      void RemovePid(Thread* t);
+
+     // Función para debugging
+     SpaceId GetPid(Thread *t);
 };

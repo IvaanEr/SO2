@@ -200,7 +200,7 @@ ExceptionHandler(ExceptionType which)
 
                 file -> Write(my_buffer, size);
               } else {
-                DEBUG('p', "[Error] Trying to invalid file id: %d\n", file_id);
+                DEBUG('p', "[Error] Trying to write invalid file id: %d\n", file_id);
               }
             }
             break;
@@ -226,11 +226,6 @@ ExceptionHandler(ExceptionType which)
             break;
           }
 
-          ///////////////////////////////////
-          // REVISE HASTA ACA
-          //////////////////////////////////
-
-
           case SC_Close: //void Close(OpenFileId id);
           {
             OpenFileId file_id = machine->ReadRegister(4);
@@ -247,7 +242,12 @@ ExceptionHandler(ExceptionType which)
           case SC_Exit:
           {
              int end_code = machine -> ReadRegister(4);
-             DEBUG('p', "Process exiting with status code: %d\n", end_code);
+
+             // Agrego esto para debuggin pero es costo computacional al pedo
+             SpaceId end_id = pidManager -> GetPid(currentThread);
+             //////////////
+
+             DEBUG('p', "Process with pid %d exiting with status code: %d\n", end_id, end_code);
              currentThread -> returnValue = end_code;
              // Ojo con esto. Si removemos currentThread los ejecutables
              // andan solamente lanzados desde shell, porque ahí se ejecutan con Fork.
@@ -293,9 +293,10 @@ ExceptionHandler(ExceptionType which)
              Thread *t        = pidManager -> GetThread(pid_hijo);
 
              if (t) {
-               DEBUG('p', "Joining process %d \n", pid_hijo);
+               DEBUG('p', "Waiting for process %d to finish\n", pid_hijo);
                int end_code     = t -> Join();
                machine -> WriteRegister(2, end_code);
+           //  DEBUG('p', "Process %d returned %d\n", pid_hijo, end_code);
              } else {
                DEBUG('p', "[Error] Could not join process %d\n", pid_hijo);
                machine -> WriteRegister(2, -1);
@@ -309,7 +310,7 @@ ExceptionHandler(ExceptionType which)
             ASSERT(false);
         }
     } else {
-        printf("Unexpected user mode exception %d %d\n", which, type);
+         printf("Unexpected user mode exception %d %d\n", which, type);
         // ASSERT(false);
     }
     IncrementPC();
