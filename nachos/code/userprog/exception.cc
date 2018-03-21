@@ -310,7 +310,7 @@ ExceptionHandler(ExceptionType which)
             ASSERT(false);
         }
     } else {
-         printf("Unexpected user mode exception %d %d\n", which, type);
+        //  printf("Unexpected user mode exception %d %d\n", which, type);
         // ASSERT(false);
     }
     IncrementPC();
