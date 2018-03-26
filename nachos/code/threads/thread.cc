@@ -32,7 +32,7 @@ const unsigned STACK_FENCEPOST = 0xdeadbeef;
 /// `Thread::Fork`.
 ///
 /// * `threadName` is an arbitrary string, useful for debugging.
-Thread::Thread(const char* threadName, bool JoinCall, int actual_priority) 
+Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
 {
     name     = threadName;
     stackTop = NULL;
@@ -41,11 +41,11 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
     CanCallJoin = JoinCall;
     ActualPriority = actual_priority;
     OldPriority = actual_priority;
-    
-    OpenFiles = new List<OpenFile *>; 
+
+    OpenFiles = new List<OpenFile *>;
     id = 2;  //comienza en 2 porque el id 0 y 1 esta asociado a la Consola
     lock = new Lock("OpenFile Lock");
-   
+
     if(JoinCall)
         puerto = new Puerto("JoinPort");
     else
@@ -151,7 +151,7 @@ Thread::Finish()
 
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
 
-    threadToBeDestroyed = currentThread;    
+    threadToBeDestroyed = currentThread;
     if(CanCallJoin)
         puerto -> Send(returnValue);
     Sleep();  // Invokes `SWITCH`.
@@ -167,7 +167,7 @@ Thread::Join()
     //printf("thread: %s",currentThread->name);
     DEBUG('t',"Thread calling join: \"%s\"\n",currentThread->name);
     ASSERT(CanCallJoin);
-    int aux;
+    int aux = -1;
     puerto -> Receive(&aux);
     return aux;
 }
@@ -247,7 +247,7 @@ Thread::AddFile(OpenFile *openFile)
     OpenFiles->SortedInsert(openFile,id);
     OpenFileId oldId = id;
     id++;
-    
+
     lock->Release();
 
     return oldId;
@@ -349,5 +349,3 @@ Thread::RestoreUserState()
         machine->WriteRegister(i, userRegisters[i]);
 }
 #endif
-
-

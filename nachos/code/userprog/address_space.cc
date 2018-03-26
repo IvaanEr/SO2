@@ -79,9 +79,9 @@ AddressSpace::AddressSpace(OpenFile *executable)
     DEBUG('a', "Initializing address space, num pages %u, size %u\n",
           numPages, size);
 
- 
+
     // BitMap *bitmap = new BitMap(NUM_PHYS_PAGES);
-    // First, set up the translation.  
+    // First, set up the translation.
 
     pageTable = new TranslationEntry[numPages];
     for (unsigned i = 0; i < numPages; i++) {
@@ -97,7 +97,8 @@ AddressSpace::AddressSpace(OpenFile *executable)
           // set its pages to be read-only.
         bzero(&machine ->mainMemory[pageTable[i].physicalPage * PAGE_SIZE], PAGE_SIZE);
     }
-    
+    // bitmap -> Print();
+
     for(int j=0;j<noffH.code.size;j++){
         char c;
         executable->ReadAt(&c,1,j+noffH.code.inFileAddr);
@@ -150,8 +151,11 @@ AddressSpace::AddressSpace(OpenFile *executable)
 /// Nothing for now!
 AddressSpace::~AddressSpace()
 {
+    for (unsigned i = 0; i < numPages; i++)
+      bitmap -> Clear(pageTable[i].physicalPage);
+
     delete [] pageTable;
-} 
+}
 
 /// Set the initial values for the user-level register set.
 ///

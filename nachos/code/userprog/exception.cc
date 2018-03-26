@@ -253,6 +253,7 @@ ExceptionHandler(ExceptionType which)
              // Ojo con esto. Si removemos currentThread los ejecutables
              // andan solamente lanzados desde shell, porque ahí se ejecutan con Fork.
              pidManager -> RemovePid(currentThread);
+             delete (currentThread -> space);
              currentThread -> Finish();
              break;
           }

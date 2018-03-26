@@ -16,7 +16,6 @@ public:
 	static Semaphore *readSem;
 private:
 	Console *console;
-  	Lock *writeLock;
-  	Lock *readLock;
+	Lock *writeLock;
+	Lock *readLock;
 };
-

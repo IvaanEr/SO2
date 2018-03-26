@@ -63,6 +63,7 @@ Semaphore::P()
         queue->Append(currentThread);  // So go to sleep.
         currentThread->Sleep();
     }
+    // DEBUG('z',"Lock '%s' being taken by %s\n",name,currentThread->getName());
     value--;  // Semaphore available, consume its value.
 
     interrupt->SetLevel(oldLevel);  // Re-enable interrupts.
@@ -112,23 +113,24 @@ Lock::IsHeldByCurrentThread()
 void
 Lock::Acquire()
 {
-  ASSERT(!(IsHeldByCurrentThread())); //antes estaba esto en lugar del if
-      if (hold_name != NULL){
-        int HolderPriority = hold_name -> ActualPriority;
-        if (HolderPriority > currentThread->ActualPriority){
-          DEBUG('s',"Realice inversion de prioridades con %s y %s\n",hold_name->getName(),currentThread->getName());
-          hold_name -> ActualPriority = currentThread->ActualPriority;
-          hold_name -> OldPriority = HolderPriority;
-        }
-      }
-      sem -> P();
-      hold_name = currentThread;
+  ASSERT(!(IsHeldByCurrentThread()));
+  if (hold_name != NULL){
+    int HolderPriority = hold_name -> ActualPriority;
+    if (HolderPriority > currentThread->ActualPriority){
+      DEBUG('s',"Realice inversion de prioridades con %s y %s\n",hold_name->getName(),currentThread->getName());
+      hold_name -> ActualPriority = currentThread->ActualPriority;
+      hold_name -> OldPriority = HolderPriority;
+    }
+  }
+  sem -> P();
+  hold_name = currentThread;
 }
 
 void
 Lock::Release()
 {
-    ASSERT(IsHeldByCurrentThread()); 
+    // DEBUG('z',"Lock '%s' being released by %s\n",name,currentThread->getName());
+    ASSERT(IsHeldByCurrentThread());
     hold_name -> ActualPriority = hold_name -> OldPriority;
 
     sem -> V();
