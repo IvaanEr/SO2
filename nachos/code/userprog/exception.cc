@@ -61,7 +61,8 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 	unsigned i=0;
 
 	do{
-			machine->ReadMem(userAddress+i,1,&c);
+			ASSERT(machine->ReadMem(userAddress+i,1,&c));
+      DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
 			outString[i] = (char) c;
 			i++;
 		} while(c != '\0' && i<maxByteCount);
@@ -260,7 +261,9 @@ ExceptionHandler(ExceptionType which)
           {
             char name[MAX_LONG_NAME];
             int nameReg = machine->ReadRegister(4);
+            DEBUG('e', "Register 4: %d\n", nameReg);
             int argsAdress = machine->ReadRegister(5);
+            DEBUG('e', "Register 5: %d\n", argsAdress);
 
             READSTR(nameReg, name, MAX_LONG_NAME);
 
@@ -310,7 +313,7 @@ ExceptionHandler(ExceptionType which)
             ASSERT(false);
         }
     } else {
-        //  printf("Unexpected user mode exception %d %d\n", which, type);
+         printf("Unexpected user mode exception %d %d\n", which, type);
         // ASSERT(false);
     }
     IncrementPC();

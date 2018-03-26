@@ -6,4 +6,4 @@ cd -
 
 clear
 
-./nachos -d p -x ../test/shell
+./nachos  -x ../test/shell

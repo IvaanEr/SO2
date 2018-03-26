@@ -4,6 +4,8 @@
 PidManager::PidManager()
 {
   lock = new Lock("PidManager Lock");
+  for (int i = 0; i < MAX_NUMBER_PROC; i++)
+    table[i] = NULL;
 }
 
 PidManager::~PidManager(){

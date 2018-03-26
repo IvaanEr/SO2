@@ -62,7 +62,7 @@ Instruction::RegFromType(RegType t) const
         case EXTRA:
             return extra;
         default:
-            ASSERT(false);
+            // ASSERT(false);
             return -1;
     }
 }

@@ -25,7 +25,7 @@ WriteArgs(char **args)
         sp -= strlen(args[i]) + 1;  // Decrease SP (leave one byte for \0).
         WriteStringToUser(args[i], sp);  // Write the string there.
         args_address[i] = sp;       // Save the argument's address.
-        delete args[i];             // Free the memory.
+        delete [] args[i];             // Free the memory.
     }
     ASSERT(i < MAX_ARG_COUNT);
 
@@ -51,7 +51,7 @@ WriteArgs(char **args)
     // Agrego...
     // ...
 
-    delete args;  // Free the array.
+    delete [] args;  // Free the array.
 }
 
 char **
@@ -65,9 +65,9 @@ SaveArgs(int address)
     unsigned i = 0;
     do {
         machine->ReadMem(address + i * 4, 4, &val);
+        DEBUG('e', "ESTOY EN SaveArgs. Valor de val: %d - i = %d\n", val, i);
         i++;
     } while (i < MAX_ARG_COUNT && val != 0);
-    // DEBUG('p', "ESTOY EN SaveArgs - 2\n");
 
     if (i == MAX_ARG_COUNT && val != 0)
         // The maximum number of arguments was reached but the last is not
@@ -86,6 +86,7 @@ SaveArgs(int address)
             // DEBUG('p', "ESTOY EN SaveArgs - for: %d\n",j);
 
         ret[j] = new char [MAX_ARG_LENGTH];
+
         // DEBUG('p', "ESTOY EN SaveArgs - jeje\n");
         machine->ReadMem(address + j * 4, 4, &val);
         ReadStringFromUser(val, ret[j], MAX_ARG_LENGTH);
