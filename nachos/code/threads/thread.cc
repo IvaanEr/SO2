@@ -34,6 +34,7 @@ const unsigned STACK_FENCEPOST = 0xdeadbeef;
 /// * `threadName` is an arbitrary string, useful for debugging.
 Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
 {
+    DEBUG('z', "Nombre del hilo: %s\n", threadName);
     name     = threadName;
     stackTop = NULL;
     stack    = NULL;
@@ -41,6 +42,8 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
     CanCallJoin = JoinCall;
     ActualPriority = actual_priority;
     OldPriority = actual_priority;
+    returnValue = 0;
+    memset(machineState, 0, MACHINE_STATE_SIZE * sizeof(unsigned));
 
     OpenFiles = new List<OpenFile *>;
     id = 2;  //comienza en 2 porque el id 0 y 1 esta asociado a la Consola

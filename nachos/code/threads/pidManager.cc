@@ -71,5 +71,6 @@ PidManager::GetPid(Thread *process)
         break;
       }
     }
+    if (res<0) ASSERT(false);
   return res;
 }

@@ -20,7 +20,7 @@
 #include "bin/noff.h"
 #include "threads/system.hh"
 
-BitMap *AddressSpace::bitmap = new BitMap(NUM_PHYS_PAGES);
+BitMap *AddressSpace::bitmap = NULL;//new BitMap(NUM_PHYS_PAGES);
 /// Do little endian to big endian conversion on the bytes in the object file
 /// header, in case the file was generated on a little endian machine, and we
 /// are re now running on a big endian machine.
@@ -57,6 +57,8 @@ AddressSpace::AddressSpace(OpenFile *executable)
 {
     NoffHeader noffH;
     unsigned   size;
+    if(!bitmap) bitmap = new BitMap(NUM_PHYS_PAGES);
+
 
     executable->ReadAt((char *) &noffH, sizeof noffH, 0);
     if (noffH.noffMagic != NOFFMAGIC &&
@@ -151,6 +153,12 @@ AddressSpace::AddressSpace(OpenFile *executable)
 /// Nothing for now!
 AddressSpace::~AddressSpace()
 {
+    DEBUG('t', "DESTRUYO");
+
+    ASSERT(this != currentThread->space);
+
+    // Agregamos esto para limpiar las páginas físicas y que Nachos
+    // no explote después de correr cierta cantidad de veces algún programa.
     for (unsigned i = 0; i < numPages; i++)
       bitmap -> Clear(pageTable[i].physicalPage);
 

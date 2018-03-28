@@ -36,7 +36,7 @@ Scheduler::~Scheduler()
     //for(int i = 0; i < PRIORITY_MAX; i++)
       //delete (readyList[i]);
     delete[] readyList;
-} 
+}
 
 /// Mark a thread as ready, but not running.
 /// Put it on the ready list, for later scheduling onto the CPU.
@@ -84,6 +84,7 @@ Scheduler::Run(Thread *nextThread)
     Thread *oldThread = currentThread;
 
 #ifdef USER_PROGRAM  // Ignore until running user programs.
+    ASSERT(currentThread->space);
     if (currentThread->space != NULL) {
         // If this thread is a user program, save the user's CPU registers.
         currentThread->SaveUserState();
@@ -119,6 +120,7 @@ Scheduler::Run(Thread *nextThread)
     }
 
 #ifdef USER_PROGRAM
+    ASSERT(currentThread->space);
     if (currentThread->space != NULL) {
         // If there is an address space to restore, do it.
         currentThread->RestoreUserState();
@@ -142,8 +144,8 @@ Scheduler::Print()
 {
     printf("Ready list contents:\n");
     for(int i = PRIORITY_MAX-1; i>=0; i--){
-      printf("Priority List nº: %d\n",i);       
+      printf("Priority List nº: %d\n",i);
       readyList[i].Apply(ThreadPrint);
     }
-    
+
 }

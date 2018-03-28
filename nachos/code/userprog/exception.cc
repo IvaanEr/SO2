@@ -7,7 +7,7 @@
 ///   the Nachos kernel.  Right now, the only function we support is `Halt`.
 ///
 /// * Exceptions: the user code does something that the CPU cannot handle.
-///   For instance, accessing memory that does not exist, arithmetic errors,
+///   For intttnce, accessing memory that does not exist, arithmetic errors,
 ///   etc.
 ///
 /// Interrupts (which can also cause control to transfer from user code into
@@ -47,6 +47,7 @@ IncrementPC()
 void
 StartProc(void *args)
 {
+    ASSERT(currentThread->space);
     currentThread->space->InitRegisters();
     currentThread->space->RestoreState();
     WriteArgs((char**)args);
@@ -62,7 +63,7 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 
 	do{
 			ASSERT(machine->ReadMem(userAddress+i,1,&c));
-      DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
+      // DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
 			outString[i] = (char) c;
 			i++;
 		} while(c != '\0' && i<maxByteCount);
@@ -253,14 +254,17 @@ ExceptionHandler(ExceptionType which)
              // Ojo con esto. Si removemos currentThread los ejecutables
              // andan solamente lanzados desde shell, porque ahí se ejecutan con Fork.
              pidManager -> RemovePid(currentThread);
-             delete (currentThread -> space);
+
+            // delete (currentThread -> space);
+
              currentThread -> Finish();
+
              break;
           }
 
           case SC_Exec: //SpaceId Exec(char *name, char **argv);
           {
-            char name[MAX_LONG_NAME];
+            char *name = new char [MAX_LONG_NAME];
             int nameReg = machine->ReadRegister(4);
             DEBUG('e', "Register 4: %d\n", nameReg);
             int argsAdress = machine->ReadRegister(5);
@@ -273,11 +277,14 @@ ExceptionHandler(ExceptionType which)
 
             if (exe) {
               char **argv = SaveArgs(argsAdress);
+              char *new_name = strdup(name);
               ASSERT(argv); // Chequeo que haya argumentos
-
+              DEBUG('p', "Binary direction: %lx\n", exe);
               AddressSpace *exe_space = new AddressSpace(exe);
-              Thread *exe_thread = new Thread(strdup(name), true, 9);
+
+              Thread *exe_thread = new Thread(new_name, true, 9);
               exe_thread -> space = exe_space;
+              delete exe;
 
               SpaceId pid_hijo = pidManager->AddPid(exe_thread);
               DEBUG('p', "Executing binary %s with id %d\n", name, pid_hijo);
@@ -287,7 +294,7 @@ ExceptionHandler(ExceptionType which)
               DEBUG('p', "[Error] Could not open executable: %s\n", name);
               machine->WriteRegister(2, -1);
             }
-
+            delete [] name;
             break;
           }
 
