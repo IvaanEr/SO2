@@ -133,8 +133,8 @@ Lock::Release()
     ASSERT(IsHeldByCurrentThread());
     hold_name -> ActualPriority = hold_name -> OldPriority;
 
-    sem -> V();
     hold_name = NULL;
+    sem -> V();
 }
 
 

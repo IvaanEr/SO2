@@ -49,6 +49,7 @@
 #include "userprog/address_space.hh"
 #endif
 
+#define MAX_OPEN_FILES 15
 /*
 typedef struct Pair_{
 	OpenFileId id;
@@ -147,7 +148,7 @@ public:
     }
 
     int returnValue;
- 
+
     int OldPriority; //priority
     int ActualPriority;
 
@@ -176,11 +177,11 @@ private:
 
     Puerto *puerto; //used for Thread::Join()
     bool CanCallJoin;
-    
+
     //used for openfiles association
     Lock *lock;
     OpenFileId id;
-    List<OpenFile*> *OpenFiles;
+    OpenFile** openFiles;
 
     /// Allocate a stack for thread.  Used internally by `Fork`.
     void StackAllocate(VoidFunctionPtr func, void *arg);

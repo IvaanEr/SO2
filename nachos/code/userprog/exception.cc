@@ -62,7 +62,7 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 
 	do{
 			ASSERT(machine->ReadMem(userAddress+i,1,&c));
-      DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
+      // DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
 			outString[i] = (char) c;
 			i++;
 		} while(c != '\0' && i<maxByteCount);
@@ -252,8 +252,6 @@ ExceptionHandler(ExceptionType which)
              currentThread -> returnValue = end_code;
              // Ojo con esto. Si removemos currentThread los ejecutables
              // andan solamente lanzados desde shell, porque ahí se ejecutan con Fork.
-             pidManager -> RemovePid(currentThread);
-             delete (currentThread -> space);
              currentThread -> Finish();
              break;
           }
@@ -299,6 +297,7 @@ ExceptionHandler(ExceptionType which)
              if (t) {
                DEBUG('p', "Waiting for process %d to finish\n", pid_hijo);
                int end_code     = t -> Join();
+               pidManager -> RemovePid(t);
                machine -> WriteRegister(2, end_code);
            //  DEBUG('p', "Process %d returned %d\n", pid_hijo, end_code);
              } else {

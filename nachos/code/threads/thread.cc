@@ -42,7 +42,7 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
     ActualPriority = actual_priority;
     OldPriority = actual_priority;
 
-    OpenFiles = new List<OpenFile *>;
+    openFiles = new OpenFile* [MAX_OPEN_FILES];
     id = 2;  //comienza en 2 porque el id 0 y 1 esta asociado a la Consola
     lock = new Lock("OpenFile Lock");
 
@@ -55,6 +55,8 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
 
 #ifdef USER_PROGRAM
     space    = NULL;
+    for(int i = 0; i<MAX_OPEN_FILES; i++)
+      openFiles[i] = NULL;
 #endif
 }
 
@@ -69,6 +71,9 @@ Thread::Thread(const char* threadName, bool JoinCall, int actual_priority)
 Thread::~Thread()
 {
     DEBUG('t', "Deleting thread \"%s\"\n", name);
+
+
+    delete [] openFiles;
 
     ASSERT(this != currentThread);
     if (stack != NULL)
@@ -149,11 +154,17 @@ Thread::Finish()
     interrupt->SetLevel(INT_OFF);
     ASSERT(this == currentThread);
 
+#ifdef USER_PROGRAM
+    delete (currentThread -> space);
+#endif
+
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
 
-    threadToBeDestroyed = currentThread;
     if(CanCallJoin)
         puerto -> Send(returnValue);
+
+
+    threadToBeDestroyed = currentThread;
     Sleep();  // Invokes `SWITCH`.
     // Not reached.
 }
@@ -240,32 +251,45 @@ Thread::Sleep()
 
 //OpenFiles methods
 OpenFileId
-Thread::AddFile(OpenFile *openFile)
+Thread::AddFile(OpenFile *newFile)
 {
-    lock->Acquire();
+    int i;
 
-    OpenFiles->SortedInsert(openFile,id);
-    OpenFileId oldId = id;
-    id++;
+    lock->Acquire();
+    for (i = 2; i<MAX_OPEN_FILES; i++) {
+      if (openFiles[i] == NULL) {
+        openFiles[i] = newFile;
+        break;
+      }
+    }
+
+    if (i == MAX_OPEN_FILES)
+      i = -1;
 
     lock->Release();
 
-    return oldId;
+    return i;
 }
 
 OpenFile*
 Thread::GetFile(OpenFileId file_id)
 {
-    OpenFile* file = OpenFiles->Find(file_id);
-    // ASSERT(file != NULL);
-    return file;
+    ASSERT(file_id >= 2 && file_id <MAX_OPEN_FILES);
+    return openFiles[file_id];
 }
 
 void
 Thread::RemoveFile(OpenFile* file)
 {
-    if(file != NULL)
-        OpenFile *f = OpenFiles->RemoveItem(file);
+    lock->Acquire();
+
+    ASSERT(file);
+
+    for (int i = 2; i<MAX_OPEN_FILES; i++)
+      if (openFiles[i] == file)
+         openFiles[i] = NULL;
+
+    lock->Release();
 }
 
 
