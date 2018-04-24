@@ -45,6 +45,8 @@ public:
     void RestoreState();
     static BitMap *bitmap;
 
+    unsigned getNumPages();
+    TranslationEntry *getPageTable();
 private:
 
     /// Assume linear page table translation for now!

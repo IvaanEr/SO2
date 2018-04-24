@@ -53,6 +53,19 @@ SwapHeader(NoffHeader *noffH)
 ///
 /// * `executable` is the file containing the object code to load into
 ///   memory.
+
+unsigned 
+AddressSpace::getNumPages()
+{
+    return numPages;
+}
+
+TranslationEntry* 
+AddressSpace::getPageTable()
+{
+    return pageTable;
+}
+
 AddressSpace::AddressSpace(OpenFile *executable)
 {
     NoffHeader noffH;
@@ -197,6 +210,8 @@ void AddressSpace::SaveState()
 /// For now, tell the machine where to find the page table.
 void AddressSpace::RestoreState()
 {
-    machine->pageTable     = pageTable;
-    machine->pageTableSize = numPages;
+    #ifndef USE_TLB
+        machine->pageTable     = pageTable;
+        machine->pageTableSize = numPages;
+    #endif
 }

@@ -33,6 +33,51 @@
 #define WRITESTR(str,add) WriteStringToUser(str,add)
 #define WRITEBUFF(buff,add,byteCount) WriteBufferToUser(buff,add,byteCount)
 
+
+// search for a valid.false entry
+int look_up () {
+    for(int i = 0; i < TLB_SIZE; i++){
+        if(!machine->tlb[i].valid){
+            return i;
+        }
+    }
+    return -1;
+
+}
+
+int replace_index() {
+    for(int i = 0; i < TLB_SIZE; i++){
+        if(machine->tlb[i].use && machine->tlb[i].dirty)
+            return i;
+    }
+    for(int i = 0; i < TLB_SIZE; i++){
+        if(machine->tlb[i].dirty)
+            return i;
+    }
+    for(int i = 0; i < TLB_SIZE; i++){
+        if(machine->tlb[i].use)
+            return i;
+    }
+    return 0;
+}
+
+void insert_translation_entry (TranslationEntry translation_entry){
+    int index = look_up();
+    if (index != -1){
+        machine->tlb[index] = translation_entry;
+    }
+    else {
+        index = replace_index();
+
+        TranslationEntry entry_to_replace = machine->tlb[index]; 
+        TranslationEntry* pt = currentThread->space->getPageTable();
+        pt[entry_to_replace.virtualPage] = entry_to_replace; 
+        
+        machine->tlb[index] = translation_entry;
+    }
+}
+
+
 void
 IncrementPC()
 {
@@ -312,7 +357,22 @@ ExceptionHandler(ExceptionType which)
             printf("Unexpected type of syscall exception %d %d\n", which, type);
             ASSERT(false);
         }
-    } else {
+    } 
+    else if (which == PAGE_FAULT_EXCEPTION) {
+      int virtual_addr = machine->ReadRegister(BAD_VADDR_REG);
+      int vpn = virtual_addr / PAGE_SIZE;
+      
+      if(virtual_addr < 0 || virtual_addr >= (currentThread->space->getNumPages() * PAGE_SIZE)){
+        machine->RaiseException(ADDRESS_ERROR_EXCEPTION, virtual_addr);
+      }
+      else {
+        TranslationEntry* pt = currentThread->space->getPageTable();
+        insert_translation_entry(pt[virtual_addr]);
+      }
+      
+
+    }
+    else {
          printf("Unexpected user mode exception %d %d\n", which, type);
         // ASSERT(false);
     }
