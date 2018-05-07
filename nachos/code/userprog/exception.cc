@@ -34,53 +34,24 @@
 #define WRITEBUFF(buff,add,byteCount) WriteBufferToUser(buff,add,byteCount)
 
 
-// search for a valid.false entry
-int look_up () {
-    for(int i = 0; i < TLB_SIZE; i++){
-        if(!machine->tlb[i].valid){
-            return i;
-        }
-    }
-    return -1;
-
-}
-
-int replace_index() {
-    for(int i = 0; i < TLB_SIZE; i++){
-        if(machine->tlb[i].use && machine->tlb[i].dirty)
-            return i;
-    }
-    for(int i = 0; i < TLB_SIZE; i++){
-        if(machine->tlb[i].dirty)
-            return i;
-    }
-    for(int i = 0; i < TLB_SIZE; i++){
-        if(machine->tlb[i].use)
-            return i;
-    }
-    return 0;
-}
-
 void insert_translation_entry (TranslationEntry translation_entry){
-    int index = look_up();
-    if (index != -1){
-        machine->tlb[index] = translation_entry;
+    int i;
+    for(i = 0; i < TLB_SIZE; i++){
+      if(!machine->tlb[i].valid){
+        machine->tlb[i] = translation_entry;
+        return;
+      }
     }
-    else {
-        index = replace_index();
-
-        TranslationEntry entry_to_replace = machine->tlb[index]; 
-        TranslationEntry* pt = currentThread->space->getPageTable();
-        pt[entry_to_replace.virtualPage] = entry_to_replace; 
-        
-        machine->tlb[index] = translation_entry;
-    }
+    i = rand() % TLB_SIZE;
+    currentThread->space->copyPage(i, machine->tlb[i].virtualPage);
+    machine->tlb[i] = translation_entry;
 }
 
 
 void
 IncrementPC()
 {
+  printf("incrementando pc\n");
   int pc = machine->ReadRegister(PC_REG);
   machine->WriteRegister(PREV_PC_REG, pc);
   pc = machine->ReadRegister(NEXT_PC_REG);
@@ -113,14 +84,23 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 		} while(c != '\0' && i<maxByteCount);
 }
 
+// #ifdef USE_TLB
+// #define READMEM(addr, size, val) if (!machine->ReadMem((unsigned)addr, (unsigned)size, (int*)val)) ASSERT(machine->ReadMem((unsigned)addr, (unsigned)size, (int*)val)) 
+// #define WRITEMEM(addr,size,val) if (!machine->WriteMem((unsigned)addr, (unsigned)size, (int)val)) ASSERT(machine->WriteMem((unsigned)addr,(unsigned)size,(int)val))
+
+// #else
+
 void
-ReadBufferFromUser(int userAddress, char *outBuffer,unsigned byteCount)
+ReadBufferFromUser(int userAddress, char *outBuffer, unsigned byteCount)
 {
 	int c;
 	unsigned i;
 
 	for(i = 0; i<byteCount; i++){
-		ASSERT(machine->ReadMem(userAddress+i,1,&c));
+    
+		if(!machine->ReadMem(userAddress+i, 1, &c)){
+      ASSERT(machine->ReadMem(userAddress+i, 1, &c));
+    }
 		outBuffer[i] = c;
 	}
 }
@@ -224,10 +204,12 @@ ExceptionHandler(ExceptionType which)
           }
 					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
           {
+            printf("entre al write\n");
             int user_buffer = machine->ReadRegister(4);
             int size = machine->ReadRegister(5);
 						OpenFileId file_id = machine->ReadRegister(6);
 
+            printf("argumentos: %d | %d | %d\n", user_buffer, size, file_id);
             char my_buffer[size];
 
             READBUFF(user_buffer, my_buffer, size);
@@ -357,24 +339,27 @@ ExceptionHandler(ExceptionType which)
             printf("Unexpected type of syscall exception %d %d\n", which, type);
             ASSERT(false);
         }
-    } 
+      IncrementPC();
+    }
     else if (which == PAGE_FAULT_EXCEPTION) {
       int virtual_addr = machine->ReadRegister(BAD_VADDR_REG);
       int vpn = virtual_addr / PAGE_SIZE;
-      
+      // printf("entre a PAGE_FAULT_EXCEPTION\n");
+
       if(virtual_addr < 0 || virtual_addr >= (currentThread->space->getNumPages() * PAGE_SIZE)){
+        printf("fuera de rango\n");
         machine->RaiseException(ADDRESS_ERROR_EXCEPTION, virtual_addr);
       }
       else {
-        TranslationEntry* pt = currentThread->space->getPageTable();
-        insert_translation_entry(pt[virtual_addr]);
+        #ifdef USE_TLB
+        TranslationEntry te = currentThread->space->getPageTable(vpn);
+        insert_translation_entry(te);
+        #endif
       }
-      
-
     }
     else {
          printf("Unexpected user mode exception %d %d\n", which, type);
-        // ASSERT(false);
+         ASSERT(false);
     }
-    IncrementPC();
+    // 
 }

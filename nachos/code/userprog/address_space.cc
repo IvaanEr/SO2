@@ -60,11 +60,17 @@ AddressSpace::getNumPages()
     return numPages;
 }
 
-TranslationEntry* 
-AddressSpace::getPageTable()
+TranslationEntry 
+AddressSpace::getPageTable(int i)
 {
-    return pageTable;
+    return pageTable[i];
 }
+
+void
+AddressSpace::copyPage(int i, int virtual_address)
+{
+    pageTable[virtual_address] = machine->tlb[i];
+};
 
 AddressSpace::AddressSpace(OpenFile *executable)
 {
@@ -202,7 +208,20 @@ AddressSpace::InitRegisters()
 ///
 /// For now, nothing!
 void AddressSpace::SaveState()
-{}
+{
+#ifdef USE_TLB
+    DEBUG('b', "Saving state (TLB)\n");
+    unsigned i;
+    TranslationEntry tlb_entry;
+
+    for(i = 0; i < TLB_SIZE; i++){
+	    tlb_entry = machine->tlb[i];
+	    if(tlb_entry.valid)
+            pageTable[tlb_entry.virtualPage] = tlb_entry;
+        //tlb_entry.valid = false;
+    }
+#endif
+}
 
 /// On a context switch, restore the machine state so that this address space
 /// can run.
@@ -210,8 +229,14 @@ void AddressSpace::SaveState()
 /// For now, tell the machine where to find the page table.
 void AddressSpace::RestoreState()
 {
-    #ifndef USE_TLB
-        machine->pageTable     = pageTable;
-        machine->pageTableSize = numPages;
-    #endif
+#ifdef USE_TLB
+    DEBUG('b', "Restoring state (TLB)\n");
+    unsigned i;
+
+    for(i = 0; i < TLB_SIZE; i++)
+        machine->tlb[i].valid = false;
+#else
+    machine->pageTable     = pageTable;
+    machine->pageTableSize = numPages;
+#endif
 }

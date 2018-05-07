@@ -46,7 +46,8 @@ public:
     static BitMap *bitmap;
 
     unsigned getNumPages();
-    TranslationEntry *getPageTable();
+    TranslationEntry getPageTable(int i);
+    void copyPage(int i, int virtual_address);
 private:
 
     /// Assume linear page table translation for now!
