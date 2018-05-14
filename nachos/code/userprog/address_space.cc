@@ -170,10 +170,11 @@ AddressSpace::AddressSpace(OpenFile *executable)
 /// Nothing for now!
 AddressSpace::~AddressSpace()
 {
-    for (unsigned i = 0; i < numPages; i++)
-      bitmap -> Clear(pageTable[i].physicalPage);
-
-    delete [] pageTable;
+    #ifndef USE_TLB
+        for (unsigned i = 0; i < numPages; i++)
+            bitmap -> Clear(pageTable[i].physicalPage);
+        delete [] pageTable;
+    #endif
 }
 
 /// Set the initial values for the user-level register set.

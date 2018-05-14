@@ -47,11 +47,9 @@ void insert_translation_entry (TranslationEntry translation_entry){
     machine->tlb[i] = translation_entry;
 }
 
-
 void
 IncrementPC()
 {
-  printf("incrementando pc\n");
   int pc = machine->ReadRegister(PC_REG);
   machine->WriteRegister(PREV_PC_REG, pc);
   pc = machine->ReadRegister(NEXT_PC_REG);
@@ -77,18 +75,15 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 	unsigned i=0;
 
 	do{
-			ASSERT(machine->ReadMem(userAddress+i,1,&c));
-      // DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
+      if(!machine->ReadMem(userAddress+i,1,&c)){
+        ASSERT(machine->ReadMem(userAddress+i,1,&c));
+      }      // DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
 			outString[i] = (char) c;
 			i++;
 		} while(c != '\0' && i<maxByteCount);
 }
 
-// #ifdef USE_TLB
-// #define READMEM(addr, size, val) if (!machine->ReadMem((unsigned)addr, (unsigned)size, (int*)val)) ASSERT(machine->ReadMem((unsigned)addr, (unsigned)size, (int*)val)) 
-// #define WRITEMEM(addr,size,val) if (!machine->WriteMem((unsigned)addr, (unsigned)size, (int)val)) ASSERT(machine->WriteMem((unsigned)addr,(unsigned)size,(int)val))
 
-// #else
 
 void
 ReadBufferFromUser(int userAddress, char *outBuffer, unsigned byteCount)
@@ -111,7 +106,9 @@ WriteStringToUser(const char *string, int userAddress)
 {
   unsigned i=0;
   do {
-		ASSERT(machine->WriteMem(userAddress+i, 1, string[i]));
+    if(!machine->WriteMem(userAddress+i, 1, string[i])){
+		  ASSERT(machine->WriteMem(userAddress+i, 1, string[i]));
+    }
     i++;
   } while(string[i-1] != '\0'); // Primero copio y después comparo para no dejar afuera al terminador
 }
@@ -120,7 +117,9 @@ void
 WriteBufferToUser(const char *buffer, int userAddress,unsigned byteCount)
 {
 	for (unsigned i = 0; i < byteCount; i++)
-		ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
+    if(!machine->WriteMem(userAddress+i, 1, buffer[i])){
+      ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
+    }
 }
 
 /// Entry point into the Nachos kernel.  Called when a user program is
@@ -204,12 +203,10 @@ ExceptionHandler(ExceptionType which)
           }
 					case SC_Write://void Write(char *buffer, int size, OpenFileId id);
           {
-            printf("entre al write\n");
             int user_buffer = machine->ReadRegister(4);
             int size = machine->ReadRegister(5);
 						OpenFileId file_id = machine->ReadRegister(6);
 
-            printf("argumentos: %d | %d | %d\n", user_buffer, size, file_id);
             char my_buffer[size];
 
             READBUFF(user_buffer, my_buffer, size);
@@ -277,8 +274,6 @@ ExceptionHandler(ExceptionType which)
 
              DEBUG('p', "Process with pid %d exiting with status code: %d\n", end_id, end_code);
              currentThread -> returnValue = end_code;
-             // Ojo con esto. Si removemos currentThread los ejecutables
-             // andan solamente lanzados desde shell, porque ahí se ejecutan con Fork.
              currentThread -> Finish();
              break;
           }
@@ -300,7 +295,7 @@ ExceptionHandler(ExceptionType which)
               char **argv = SaveArgs(argsAdress);
               ASSERT(argv); // Chequeo que haya argumentos
 
-              AddressSpace *exe_space = new AddressSpace(exe);
+              AddressSpace *exe_space =  new AddressSpace(exe);
               Thread *exe_thread = new Thread(strdup(name), true, 9);
               exe_thread -> space = exe_space;
 
@@ -322,12 +317,14 @@ ExceptionHandler(ExceptionType which)
              Thread *t        = pidManager -> GetThread(pid_hijo);
 
              if (t) {
+              //  printf("entre el if\n");
                DEBUG('p', "Waiting for process %d to finish\n", pid_hijo);
-               int end_code     = t -> Join();
+               int end_code = t -> Join();
                pidManager -> RemovePid(t);
                machine -> WriteRegister(2, end_code);
            //  DEBUG('p', "Process %d returned %d\n", pid_hijo, end_code);
              } else {
+
                DEBUG('p', "[Error] Could not join process %d\n", pid_hijo);
                machine -> WriteRegister(2, -1);
              }
@@ -344,7 +341,6 @@ ExceptionHandler(ExceptionType which)
     else if (which == PAGE_FAULT_EXCEPTION) {
       int virtual_addr = machine->ReadRegister(BAD_VADDR_REG);
       int vpn = virtual_addr / PAGE_SIZE;
-      // printf("entre a PAGE_FAULT_EXCEPTION\n");
 
       if(virtual_addr < 0 || virtual_addr >= (currentThread->space->getNumPages() * PAGE_SIZE)){
         printf("fuera de rango\n");
@@ -361,5 +357,4 @@ ExceptionHandler(ExceptionType which)
          printf("Unexpected user mode exception %d %d\n", which, type);
          ASSERT(false);
     }
-    // 
 }
