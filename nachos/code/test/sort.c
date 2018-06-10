@@ -7,6 +7,7 @@
 
 
 #include "syscall.h"
+// #include "../userprog/syscall.h"
 
 
 #define DIM  1024
@@ -32,6 +33,7 @@ main(void)
                 A[j + 1] = tmp;
             }
 
+    Halt();
     // And then we're done -- should be 0!
     Exit(A[0]);
 }

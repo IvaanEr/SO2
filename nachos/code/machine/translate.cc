@@ -222,11 +222,13 @@ Machine::Translate(unsigned virtAddr, unsigned *physAddr,
     } else {
         for (entry = NULL, i = 0; i < TLB_SIZE; i++)
             if (tlb[i].valid && tlb[i].virtualPage == vpn) {
+                stats -> tlbHits++;
                 // printf("##### ENTRE A VALID");
                 entry = &tlb[i];  // FOUND!
                 break;
             }
         if (entry == NULL) {  // Not found.
+            stats -> tlbMisses++;
             DEBUG('a',
                   "*** no valid TLB entry found for this virtual page!\n");
             return PAGE_FAULT_EXCEPTION;  // Really, this is a TLB fault, the

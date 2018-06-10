@@ -339,6 +339,7 @@ ExceptionHandler(ExceptionType which)
       IncrementPC();
     }
     else if (which == PAGE_FAULT_EXCEPTION) {
+      DEBUG('a', "Page Fault Exception \n");
       int virtual_addr = machine->ReadRegister(BAD_VADDR_REG);
       int vpn = virtual_addr / PAGE_SIZE;
 
