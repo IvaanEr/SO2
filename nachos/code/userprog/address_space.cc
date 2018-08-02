@@ -213,13 +213,10 @@ void AddressSpace::SaveState()
 #ifdef USE_TLB
     DEBUG('b', "Saving state (TLB)\n");
     unsigned i;
-    TranslationEntry tlb_entry;
 
     for(i = 0; i < TLB_SIZE; i++){
-	    tlb_entry = machine->tlb[i];
-	    if(tlb_entry.valid)
-            pageTable[tlb_entry.virtualPage] = tlb_entry;
-        //tlb_entry.valid = false;
+	    if(machine->tlb[i].dirty && machine->tlb[i].valid)
+            pageTable[machine->tlb[i].virtualPage] = machine->tlb[i];
     }
 #endif
 }

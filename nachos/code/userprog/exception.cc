@@ -43,6 +43,7 @@ void insert_translation_entry (TranslationEntry translation_entry){
       }
     }
     i = rand() % TLB_SIZE;
+    ASSERT(0 <= i && i < TLB_SIZE);
     currentThread->space->copyPage(i, machine->tlb[i].virtualPage);
     machine->tlb[i] = translation_entry;
 }
@@ -280,7 +281,7 @@ ExceptionHandler(ExceptionType which)
 
           case SC_Exec: //SpaceId Exec(char *name, char **argv);
           {
-            char name[MAX_LONG_NAME];
+            char *name = new char[MAX_LONG_NAME];
             int nameReg = machine->ReadRegister(4);
             DEBUG('e', "Register 4: %d\n", nameReg);
             int argsAdress = machine->ReadRegister(5);
@@ -290,19 +291,19 @@ ExceptionHandler(ExceptionType which)
 
             OpenFile *exe = fileSystem->Open(name);
 
-
             if (exe) {
               char **argv = SaveArgs(argsAdress);
               ASSERT(argv); // Chequeo que haya argumentos
 
-              AddressSpace *exe_space =  new AddressSpace(exe);
               Thread *exe_thread = new Thread(strdup(name), true, 9);
+              exe_thread -> Fork(StartProc, argv);
+              SpaceId pid_hijo = pidManager->AddPid(exe_thread);
+
+              AddressSpace *exe_space =  new AddressSpace(exe);
               exe_thread -> space = exe_space;
 
-              SpaceId pid_hijo = pidManager->AddPid(exe_thread);
               DEBUG('p', "Executing binary %s with id %d\n", name, pid_hijo);
               machine->WriteRegister(2, pid_hijo);
-              exe_thread -> Fork(StartProc,(void *)argv);
             } else {
               DEBUG('p', "[Error] Could not open executable: %s\n", name);
               machine->WriteRegister(2, -1);
