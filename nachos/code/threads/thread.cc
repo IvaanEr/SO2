@@ -154,9 +154,7 @@ Thread::Finish()
     interrupt->SetLevel(INT_OFF);
     ASSERT(this == currentThread);
 
-#ifdef USER_PROGRAM
-    delete (currentThread -> space);
-#endif
+
 
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
 
@@ -165,6 +163,11 @@ Thread::Finish()
 
 
     threadToBeDestroyed = currentThread;
+
+#ifdef USER_PROGRAM
+    delete (currentThread -> space);
+#endif
+
     Sleep();  // Invokes `SWITCH`.
     // Not reached.
 }

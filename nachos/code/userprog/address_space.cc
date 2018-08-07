@@ -118,7 +118,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
     }
     // bitmap -> Print();
 
-    for(int j=0;j<noffH.code.size;j++){
+    for(int j=0; j<noffH.code.size;j++){
         char c;
         executable->ReadAt(&c,1,j+noffH.code.inFileAddr);
         int viraddr = noffH.code.virtualAddr + j;

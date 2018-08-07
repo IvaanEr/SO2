@@ -267,15 +267,17 @@ ExceptionHandler(ExceptionType which)
 
           case SC_Exit:
           {
+            //  printf("Exit 1\n");
              int end_code = machine -> ReadRegister(4);
-
+            //  printf("Exit 2 %d\n", end_code);
              // Agrego esto para debuggin pero es costo computacional al pedo
              SpaceId end_id = pidManager -> GetPid(currentThread);
              //////////////
-
+              // printf("Exit 3\n");
              DEBUG('p', "Process with pid %d exiting with status code: %d\n", end_id, end_code);
              currentThread -> returnValue = end_code;
              currentThread -> Finish();
+             stats ->Print();
              break;
           }
 
@@ -304,6 +306,7 @@ ExceptionHandler(ExceptionType which)
 
               DEBUG('p', "Executing binary %s with id %d\n", name, pid_hijo);
               machine->WriteRegister(2, pid_hijo);
+              
             } else {
               DEBUG('p', "[Error] Could not open executable: %s\n", name);
               machine->WriteRegister(2, -1);
@@ -316,7 +319,8 @@ ExceptionHandler(ExceptionType which)
           {
              SpaceId pid_hijo = machine -> ReadRegister(4);
              Thread *t        = pidManager -> GetThread(pid_hijo);
-
+             const char *name = t->getName();
+            //  printf("Joining %s \n", name);
              if (t) {
               //  printf("entre el if\n");
                DEBUG('p', "Waiting for process %d to finish\n", pid_hijo);

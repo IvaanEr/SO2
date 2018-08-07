@@ -32,8 +32,9 @@ main(void)
                 A[j] = A[j + 1];
                 A[j + 1] = tmp;
             }
+    // Halt();
 
-    Halt();
     // And then we're done -- should be 0!
     Exit(A[0]);
+    
 }
