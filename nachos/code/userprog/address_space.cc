@@ -213,7 +213,6 @@ void AddressSpace::SaveState()
 #ifdef USE_TLB
     DEBUG('b', "Saving state (TLB)\n");
     unsigned i;
-
     for(i = 0; i < TLB_SIZE; i++){
 	    if(machine->tlb[i].dirty && machine->tlb[i].valid)
             pageTable[machine->tlb[i].virtualPage] = machine->tlb[i];

@@ -39,6 +39,10 @@ public:
     /// Initialize user-level CPU registers, before jumping to user code.
     void InitRegisters();
 
+
+    TranslationEntry BringPage(unsigned i) { return pageTable[i]; };
+    void LoadPage(int vaddr);
+
     /// Save/restore address space-specific info on a context switch.
 
     void SaveState();

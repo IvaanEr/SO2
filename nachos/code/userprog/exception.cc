@@ -276,8 +276,9 @@ ExceptionHandler(ExceptionType which)
               // printf("Exit 3\n");
              DEBUG('p', "Process with pid %d exiting with status code: %d\n", end_id, end_code);
              currentThread -> returnValue = end_code;
+             printf("estoy por stats->print()\n\n");
+             stats -> Print();
              currentThread -> Finish();
-             stats ->Print();
              break;
           }
 
@@ -356,6 +357,11 @@ ExceptionHandler(ExceptionType which)
         #ifdef USE_TLB
         TranslationEntry te = currentThread->space->getPageTable(vpn);
         insert_translation_entry(te);
+        #endif
+
+        #ifdef USE_DML
+        if(currentThread->space->getPageTable(vpn).physicalPage == -1)
+            currentThread->space->LoadPage(vaddr);
         #endif
       }
     }

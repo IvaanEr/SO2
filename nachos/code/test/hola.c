@@ -1,6 +1,6 @@
 #include "../userprog/syscall.h"
 
 int main(){
-	Write("H\n",2,ConsoleOutput);
+	Write("Hola Mundo!\n",12,ConsoleOutput);
 	Exit(0);
 }
