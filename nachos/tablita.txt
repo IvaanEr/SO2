@@ -1,0 +1,104 @@
+################################
+TLB_SIZE = 4
+____________________
+$ ../test/shell
+NachOS> ../test/hola
+
+TLB Hits: 87.45%
+____________________
+
+$ ../test/shell
+NachOS> ../test/consoleTest
+
+TLB Hits: 88.59%
+____________________
+
+$ ../test/shell
+NachOS> ../test/matmult
+
+TLB Hits: 92.27%
+____________________
+
+$ ../test/shell
+NachOS> ../test/sort
+
+TLB Hits: 92.30%
+
+################################
+TLB_SIZE = 16
+____________________
+$ ../test/shell
+NachOS> ../test/hola
+
+TLB Hits: 92.79%
+____________________
+
+$ ../test/shell
+NachOS> ../test/consoleTest
+
+TLB Hits: 90.40%
+____________________
+
+$ ../test/shell
+NachOS> ../test/matmult
+
+TLB Hits: 98.22%
+____________________
+
+$ ../test/shell
+NachOS> ../test/sort
+
+TLB Hits: 98.24%
+
+################################
+TLB_SIZE = 32
+____________________
+$ ../test/shell
+NachOS> ../test/hola
+
+TLB Hits: 92.79%
+____________________
+
+$ ../test/shell
+NachOS> ../test/consoleTest
+
+TLB Hits: 90.40%
+____________________
+
+$ ../test/shell
+NachOS> ../test/matmult
+
+TLB Hits: 98.74%
+____________________
+
+$ ../test/shell
+NachOS> ../test/sort
+
+TLB Hits: 98.76%
+
+################################
+TLB_SIZE = 64
+____________________
+$ ../test/shell
+NachOS> ../test/hola
+
+TLB Hits: 92.79%
+____________________
+
+$ ../test/shell
+NachOS> ../test/consoleTest
+
+TLB Hits: 90.40%
+____________________
+
+$ ../test/shell
+NachOS> ../test/matmult
+
+TLB Hits: 99.63%
+____________________
+
+$ ../test/shell
+NachOS> ../test/sort
+
+TLB Hits: 99.64%
+
