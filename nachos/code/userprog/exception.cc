@@ -361,7 +361,7 @@ ExceptionHandler(ExceptionType which)
 
         #ifdef USE_DML
         if(currentThread->space->getPageTable(vpn).physicalPage == -1)
-            currentThread->space->LoadPage(vaddr);
+            currentThread->space->LoadPage(virtual_addr);
         #endif
       }
     }

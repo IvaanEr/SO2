@@ -56,6 +56,8 @@ public:
 
     unsigned Length() { Lseek(file, 0, 2); return Tell(file); }
 
+    void Caca() {printf ("CACACACACACA file: %d\n", file); printf("CACACACACA currentOffset: %d\n", currentOffset);}
+
 private:
     int file;
     unsigned currentOffset;

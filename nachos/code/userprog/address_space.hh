@@ -13,7 +13,7 @@
 #ifndef NACHOS_USERPROG_ADDRSPACE__HH
 #define NACHOS_USERPROG_ADDRSPACE__HH
 
-
+#include "bin/noff.h"
 #include "filesys/file_system.hh"
 #include "machine/translation_entry.hh"
 #include <string.h> //to use bzero
@@ -39,8 +39,6 @@ public:
     /// Initialize user-level CPU registers, before jumping to user code.
     void InitRegisters();
 
-
-    TranslationEntry BringPage(unsigned i) { return pageTable[i]; };
     void LoadPage(int vaddr);
 
     /// Save/restore address space-specific info on a context switch.
@@ -48,6 +46,9 @@ public:
     void SaveState();
     void RestoreState();
     static BitMap *bitmap;
+    
+    OpenFile *exe;
+    NoffHeader noffH;
 
     unsigned getNumPages();
     TranslationEntry getPageTable(int i);
@@ -60,6 +61,7 @@ private:
     /// Number of pages in the virtual address space.
     unsigned numPages;
 
+    /// For demand loading
 };
 
 

@@ -72,12 +72,70 @@ AddressSpace::copyPage(int i, int virtual_address)
     pageTable[virtual_address] = machine->tlb[i];
 };
 
+void
+AddressSpace::LoadPage(int vaddr)
+{
+    ASSERT(exe);
+    // DEBUG('z',"Loading segment from addr: %u\n",vaddr);
+    Segment segment;
+    bool flag = false;
+    if((vaddr >= noffH.code.virtualAddr) && (vaddr <= noffH.code.virtualAddr + noffH.code.size)){ 
+        //Code segment
+        segment = noffH.code;
+        //DEBUG('z',"Address: [%u] was found to be in code\n", vaddr);
+    } else if((vaddr >= noffH.initData.virtualAddr) && (vaddr <= noffH.initData.virtualAddr + noffH.initData.size)){ 
+        //InitData segment
+        segment = noffH.initData;
+        //DEBUG('z',"Address: [%u] was found to be in initData\n", vaddr);
+    } else { 
+        //UninitData segment
+        segment = noffH.uninitData;
+        flag = true;
+        //DEBUG('z',"Address: [%u] was found to be in uninitData\n", vaddr);
+    }
+    
+    int vpn = vaddr / PAGE_SIZE;
+
+    int ppn = bitmap->Find();
+
+    ASSERT(ppn >= 0);
+    pageTable[vpn].physicalPage = ppn;
+    int pp  = ppn * PAGE_SIZE;
+
+    printf("LoadPage #####\n");
+    exe->Caca();
+
+    for (int j = 0; (j < (int)PAGE_SIZE) && (j < exe->Length() - vaddr - 40); j++){
+        char c;
+
+        if(!flag){ // Load the data
+            int res = exe->ReadAt(&c, 1, j + segment.inFileAddr + vpn * PAGE_SIZE - segment.virtualAddr);
+            ASSERT(res == 1);
+        } else { // Fill the uninitialized data zone with zero's
+            c = (char)0;
+        }
+
+        int paddr  = pp + j;
+        machine->mainMemory[paddr] = c;
+    }
+
+    pageTable[vpn].valid = true;
+}
+
 AddressSpace::AddressSpace(OpenFile *executable)
 {
-    NoffHeader noffH;
     unsigned   size;
+    ASSERT(executable);
+    // Save the executable for later
+    exe = executable;
 
-    executable->ReadAt((char *) &noffH, sizeof noffH, 0);
+    printf("\nexecutable #### \n");
+    executable -> Caca();
+    printf("\nexe #### \n");
+    exe -> Caca();
+
+    exe->ReadAt((char *) &noffH, sizeof noffH, 0);
+
     if (noffH.noffMagic != NOFFMAGIC &&
           WordToHost(noffH.noffMagic) == NOFFMAGIC)
         SwapHeader(&noffH);
@@ -88,7 +146,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size
            + USER_STACK_SIZE;
       // We need to increase the size to leave room for the stack.
-    numPages = divRoundUp(size, PAGE_SIZE);
+    numPages = divRoundUp(size, PAGE_SIZE); 
     size = numPages * PAGE_SIZE;
 
     ASSERT(numPages <= NUM_PHYS_PAGES);
@@ -104,23 +162,29 @@ AddressSpace::AddressSpace(OpenFile *executable)
 
     pageTable = new TranslationEntry[numPages];
     for (unsigned i = 0; i < numPages; i++) {
+        #ifdef USE_DML
+            pageTable[i].physicalPage  = -1;
+            pageTable[i].valid = false;
+        #else
+            // For now, virtual page number = physical page number. NO MORE!
+            pageTable[i].physicalPage = bitmap->Find();
+            ASSERT((int)pageTable[i].physicalPage != -1);
+            pageTable[i].valid        = true;
+        #endif
+        // Always do:
         pageTable[i].virtualPage  = i;
-          // For now, virtual page number = physical page number. NO MORE!
-        pageTable[i].physicalPage = bitmap->Find();
-        ASSERT((int)pageTable[i].physicalPage != -1);
-        pageTable[i].valid        = true;
         pageTable[i].use          = false;
         pageTable[i].dirty        = false;
         pageTable[i].readOnly     = false;
           // If the code segment was entirely on a separate page, we could
           // set its pages to be read-only.
-        bzero(&machine ->mainMemory[pageTable[i].physicalPage * PAGE_SIZE], PAGE_SIZE);
+        // bzero(&machine ->mainMemory[pageTable[i].physicalPage * PAGE_SIZE], PAGE_SIZE);
     }
     // bitmap -> Print();
-
+#ifndef USE_DML
     for(int j=0; j<noffH.code.size;j++){
         char c;
-        executable->ReadAt(&c,1,j+noffH.code.inFileAddr);
+        exe->ReadAt(&c,1,j+noffH.code.inFileAddr);
         int viraddr = noffH.code.virtualAddr + j;
         int vpn = viraddr / PAGE_SIZE;
         int offset = viraddr % PAGE_SIZE;
@@ -134,7 +198,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
 
     for(int j = 0; j<noffH.initData.size;j++){
         char c;
-        executable->ReadAt(&c,1,j+noffH.initData.inFileAddr);
+        exe->ReadAt(&c,1,j+noffH.initData.inFileAddr);
         int viraddr = noffH.initData.virtualAddr + j;
         int vpn = viraddr / PAGE_SIZE;
         int offset = viraddr % PAGE_SIZE;
@@ -144,6 +208,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
 
         machine->mainMemory[phisaddr] = c;
     }
+#endif
     // Zero out the entire address space, to zero the unitialized data
     // segment and the stack segment.
     // memset(machine->mainMemory, 0, size);
