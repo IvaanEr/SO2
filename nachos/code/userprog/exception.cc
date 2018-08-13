@@ -276,8 +276,8 @@ ExceptionHandler(ExceptionType which)
               // printf("Exit 3\n");
              DEBUG('p', "Process with pid %d exiting with status code: %d\n", end_id, end_code);
              currentThread -> returnValue = end_code;
-             printf("estoy por stats->print()\n\n");
-             stats -> Print();
+            //  printf("estoy por stats->print()\n\n");
+            //  stats -> Print();
              currentThread -> Finish();
              break;
           }
@@ -291,7 +291,7 @@ ExceptionHandler(ExceptionType which)
             DEBUG('e', "Register 5: %d\n", argsAdress);
 
             READSTR(nameReg, name, MAX_LONG_NAME);
-
+            printf("LLAMO A ESTA MIERDA SIN SHELL???\n");
             OpenFile *exe = fileSystem->Open(name);
 
             if (exe) {
@@ -354,15 +354,15 @@ ExceptionHandler(ExceptionType which)
         machine->RaiseException(ADDRESS_ERROR_EXCEPTION, virtual_addr);
       }
       else {
+        #ifdef USE_DML
+        if(currentThread->space->getPageTable(vpn).physicalPage == -1)
+            currentThread->space->LoadPage(virtual_addr);
+        #endif
         #ifdef USE_TLB
         TranslationEntry te = currentThread->space->getPageTable(vpn);
         insert_translation_entry(te);
         #endif
 
-        #ifdef USE_DML
-        if(currentThread->space->getPageTable(vpn).physicalPage == -1)
-            currentThread->space->LoadPage(virtual_addr);
-        #endif
       }
     }
     else {

@@ -47,8 +47,6 @@ public:
     void RestoreState();
     static BitMap *bitmap;
     
-    OpenFile *exe;
-    NoffHeader noffH;
 
     unsigned getNumPages();
     TranslationEntry getPageTable(int i);
@@ -62,6 +60,9 @@ private:
     unsigned numPages;
 
     /// For demand loading
+    OpenFile *exe;
+    NoffHeader noffH;
+
 };
 
 

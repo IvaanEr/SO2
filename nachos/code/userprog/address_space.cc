@@ -102,8 +102,11 @@ AddressSpace::LoadPage(int vaddr)
     pageTable[vpn].physicalPage = ppn;
     int pp  = ppn * PAGE_SIZE;
 
-    printf("LoadPage #####\n");
-    exe->Caca();
+    // printf("LoadPage #####\n");
+    // // exe->Caca();
+    // int a = AddressSpace::exe->Length();
+    // printf("LoadPage %d\n", a);
+
 
     for (int j = 0; (j < (int)PAGE_SIZE) && (j < exe->Length() - vaddr - 40); j++){
         char c;
@@ -127,12 +130,12 @@ AddressSpace::AddressSpace(OpenFile *executable)
     unsigned   size;
     ASSERT(executable);
     // Save the executable for later
-    exe = executable;
+    AddressSpace::exe = executable;
 
-    printf("\nexecutable #### \n");
-    executable -> Caca();
-    printf("\nexe #### \n");
-    exe -> Caca();
+    int a = exe -> Length();
+    printf("AddressSpace::Exe Length %d\n\n", a);
+    
+    AddressSpace::bitmap -> Print();
 
     exe->ReadAt((char *) &noffH, sizeof noffH, 0);
 
@@ -240,6 +243,7 @@ AddressSpace::~AddressSpace()
             bitmap -> Clear(pageTable[i].physicalPage);
         delete [] pageTable;
     #endif
+    delete exe;
 }
 
 /// Set the initial values for the user-level register set.

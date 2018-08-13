@@ -92,6 +92,7 @@ public:
     // Return the number of bytes in the file (this interface is simpler than
     // the UNIX idiom -- `lseek` to end of file, `tell`, `lseek` back).
     unsigned Length();
+    void Caca() {printf ("lala"); };
 
   private:
     FileHeader *hdr;  ///< Header for this file.

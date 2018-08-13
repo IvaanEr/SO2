@@ -119,7 +119,8 @@ main(int argc, char **argv)
             return 0;
         }
 #ifdef USER_PROGRAM
-        if (!strcmp(*argv, "-x")) {         // Run a user program.
+        if (!strcmp(*argv, "-x")) {
+            printf("ENTRANDO AL IMPORTANTE!\n");       // Run a user program.
             ASSERT(argc > 1);
             StartProcess(*(argv + 1));
             argCount = 2;
@@ -131,6 +132,7 @@ main(int argc, char **argv)
                 ConsoleTest(*(argv + 1), *(argv + 2));
                 argCount = 3;
             }
+            printf("ES ESTE HALT?!?!\n");
             interrupt->Halt();  // Once we start the console, then Nachos
                                 // will loop forever waiting for console
                                 // input.

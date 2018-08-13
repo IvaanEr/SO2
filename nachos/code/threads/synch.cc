@@ -226,7 +226,6 @@ Puerto::Receive(int *mensaje){
   while(IsEmpty)
     full-> Wait();
 
-  printf("Puerto::Receive\n");
   *mensaje = buff;
   IsEmpty = true;
   empty -> Signal();
