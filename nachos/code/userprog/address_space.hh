@@ -46,7 +46,7 @@ public:
     void SaveState();
     void RestoreState();
     static BitMap *bitmap;
-    
+
 
     unsigned getNumPages();
     TranslationEntry getPageTable(int i);
@@ -64,6 +64,4 @@ private:
     NoffHeader noffH;
 
 };
-
-
 #endif

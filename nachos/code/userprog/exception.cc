@@ -93,7 +93,7 @@ ReadBufferFromUser(int userAddress, char *outBuffer, unsigned byteCount)
 	unsigned i;
 
 	for(i = 0; i<byteCount; i++){
-    
+
 		if(!machine->ReadMem(userAddress+i, 1, &c)){
       ASSERT(machine->ReadMem(userAddress+i, 1, &c));
     }
@@ -306,7 +306,7 @@ ExceptionHandler(ExceptionType which)
 
               DEBUG('p', "Executing binary %s with id %d\n", name, pid_hijo);
               machine->WriteRegister(2, pid_hijo);
-              
+
             } else {
               DEBUG('p', "[Error] Could not open executable: %s\n", name);
               machine->WriteRegister(2, -1);

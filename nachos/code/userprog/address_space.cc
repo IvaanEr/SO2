@@ -54,13 +54,13 @@ SwapHeader(NoffHeader *noffH)
 /// * `executable` is the file containing the object code to load into
 ///   memory.
 
-unsigned 
+unsigned
 AddressSpace::getNumPages()
 {
     return numPages;
 }
 
-TranslationEntry 
+TranslationEntry
 AddressSpace::getPageTable(int i)
 {
     return pageTable[i];
@@ -149,7 +149,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size
            + USER_STACK_SIZE;
       // We need to increase the size to leave room for the stack.
-    numPages = divRoundUp(size, PAGE_SIZE); 
+    numPages = divRoundUp(size, PAGE_SIZE);
     size = numPages * PAGE_SIZE;
 
     ASSERT(numPages <= NUM_PHYS_PAGES);
