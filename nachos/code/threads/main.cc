@@ -120,7 +120,6 @@ main(int argc, char **argv)
         }
 #ifdef USER_PROGRAM
         if (!strcmp(*argv, "-x")) {
-            printf("ENTRANDO AL IMPORTANTE!\n");       // Run a user program.
             ASSERT(argc > 1);
             StartProcess(*(argv + 1));
             argCount = 2;

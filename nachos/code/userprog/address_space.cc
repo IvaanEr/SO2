@@ -130,12 +130,12 @@ AddressSpace::AddressSpace(OpenFile *executable)
     unsigned   size;
     ASSERT(executable);
     // Save the executable for later
-    AddressSpace::exe = executable;
+    exe = executable;
 
-    int a = exe -> Length();
-    printf("AddressSpace::Exe Length %d\n\n", a);
-    
-    AddressSpace::bitmap -> Print();
+    //int a = exe -> Length();
+    //printf("AddressSpace::Exe Length %d\n\n", a);
+
+    // AddressSpace::bitmap -> Print();
 
     exe->ReadAt((char *) &noffH, sizeof noffH, 0);
 
@@ -181,7 +181,9 @@ AddressSpace::AddressSpace(OpenFile *executable)
         pageTable[i].readOnly     = false;
           // If the code segment was entirely on a separate page, we could
           // set its pages to be read-only.
-        // bzero(&machine ->mainMemory[pageTable[i].physicalPage * PAGE_SIZE], PAGE_SIZE);
+        #ifndef USE_DML
+            bzero(&machine ->mainMemory[pageTable[i].physicalPage * PAGE_SIZE], PAGE_SIZE);
+        #endif
     }
     // bitmap -> Print();
 #ifndef USE_DML

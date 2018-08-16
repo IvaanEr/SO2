@@ -33,7 +33,6 @@ Statistics::Statistics()
 void
 Statistics::Print()
 {
-printf("ENTRE ! \n");
 #ifdef DFS_TICKS_FIX
     if (tickResets != 0)
         printf("WARNING: the tick counter was reset %lu times; the following"

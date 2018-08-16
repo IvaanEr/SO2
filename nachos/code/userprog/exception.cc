@@ -291,7 +291,6 @@ ExceptionHandler(ExceptionType which)
             DEBUG('e', "Register 5: %d\n", argsAdress);
 
             READSTR(nameReg, name, MAX_LONG_NAME);
-            printf("LLAMO A ESTA MIERDA SIN SHELL???\n");
             OpenFile *exe = fileSystem->Open(name);
 
             if (exe) {
