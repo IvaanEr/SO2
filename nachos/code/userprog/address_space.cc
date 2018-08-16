@@ -72,57 +72,31 @@ AddressSpace::copyPage(int i, int virtual_address)
     pageTable[virtual_address] = machine->tlb[i];
 };
 
-void
-AddressSpace::LoadPage(int vaddr)
+void AddressSpace::LoadPage(int vpage)
 {
-    ASSERT(exe);
-    // DEBUG('z',"Loading segment from addr: %u\n",vaddr);
-    Segment segment;
-    bool flag = false;
-    if((vaddr >= noffH.code.virtualAddr) && (vaddr <= noffH.code.virtualAddr + noffH.code.size)){ 
-        //Code segment
-        segment = noffH.code;
-        //DEBUG('z',"Address: [%u] was found to be in code\n", vaddr);
-    } else if((vaddr >= noffH.initData.virtualAddr) && (vaddr <= noffH.initData.virtualAddr + noffH.initData.size)){ 
-        //InitData segment
-        segment = noffH.initData;
-        //DEBUG('z',"Address: [%u] was found to be in initData\n", vaddr);
-    } else { 
-        //UninitData segment
-        segment = noffH.uninitData;
-        flag = true;
-        //DEBUG('z',"Address: [%u] was found to be in uninitData\n", vaddr);
-    }
-    
-    int vpn = vaddr / PAGE_SIZE;
+    // unsigned int vpage = vaddr / PAGE_SIZE;
 
-    int ppn = bitmap->Find();
+    int ppage = bitmap->Find();
+    ASSERT(ppage >= 0);
 
-    ASSERT(ppn >= 0);
-    pageTable[vpn].physicalPage = ppn;
-    int pp  = ppn * PAGE_SIZE;
+    for (int bytes = 0; bytes < PAGE_SIZE; bytes++) {
+        int vaddr = vpage * PAGE_SIZE + bytes;
+        int paddr = ppage * PAGE_SIZE + bytes;
 
-    // printf("LoadPage #####\n");
-    // // exe->Caca();
-    // int a = AddressSpace::exe->Length();
-    // printf("LoadPage %d\n", a);
-
-
-    for (int j = 0; (j < (int)PAGE_SIZE) && (j < exe->Length() - vaddr - 40); j++){
-        char c;
-
-        if(!flag){ // Load the data
-            int res = exe->ReadAt(&c, 1, j + segment.inFileAddr + vpn * PAGE_SIZE - segment.virtualAddr);
-            ASSERT(res == 1);
-        } else { // Fill the uninitialized data zone with zero's
-            c = (char)0;
+        if (vaddr >= noffH.code.virtualAddr && // Code segment
+            vaddr < noffH.code.virtualAddr + noffH.code.size) {
+            exe -> ReadAt(&(machine->mainMemory[paddr]), 1,
+                      noffH.code.inFileAddr + vaddr - noffH.code.virtualAddr);
+        } else if (vaddr >= noffH.initData.virtualAddr && // Data segment
+            vaddr < noffH.initData.virtualAddr + noffH.initData.size) {
+            exe -> ReadAt(&(machine->mainMemory[paddr]), 1,
+                      noffH.initData.inFileAddr + vaddr - noffH.initData.virtualAddr);
+        } else {
+          machine->mainMemory[paddr] = 0;
         }
-
-        int paddr  = pp + j;
-        machine->mainMemory[paddr] = c;
     }
-
-    pageTable[vpn].valid = true;
+    pageTable[vpage].physicalPage = ppage;
+    pageTable[vpage].valid = true;
 }
 
 AddressSpace::AddressSpace(OpenFile *executable)

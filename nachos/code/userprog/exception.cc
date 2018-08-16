@@ -355,7 +355,7 @@ ExceptionHandler(ExceptionType which)
       else {
         #ifdef USE_DML
         if(currentThread->space->getPageTable(vpn).physicalPage == -1)
-            currentThread->space->LoadPage(virtual_addr);
+            currentThread->space->LoadPage(vpn);
         #endif
         #ifdef USE_TLB
         TranslationEntry te = currentThread->space->getPageTable(vpn);
