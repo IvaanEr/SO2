@@ -21,7 +21,7 @@
 
 class BitMap;
 
-const unsigned USER_STACK_SIZE = 1024;  ///< Increase this as necessary!
+const unsigned USER_STACK_SIZE = 4096;  ///< Increase this as necessary!
 
 
 class AddressSpace {
