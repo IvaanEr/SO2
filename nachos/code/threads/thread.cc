@@ -78,6 +78,11 @@ Thread::~Thread()
     ASSERT(this != currentThread);
     if (stack != NULL)
         DeallocBoundedArray((char *) stack, STACK_SIZE * sizeof *stack);
+
+#ifdef USER_PROGRAM
+    delete (this -> space);
+#endif
+
 //    if(CanCallJoin)
 //        delete puerto;
 }
@@ -163,10 +168,6 @@ Thread::Finish()
 
 
     threadToBeDestroyed = currentThread;
-
-#ifdef USER_PROGRAM
-    delete (currentThread -> space);
-#endif
 
     Sleep();  // Invokes `SWITCH`.
     // Not reached.
