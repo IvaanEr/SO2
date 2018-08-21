@@ -34,20 +34,6 @@
 #define WRITEBUFF(buff,add,byteCount) WriteBufferToUser(buff,add,byteCount)
 
 
-void insert_translation_entry (TranslationEntry translation_entry){
-    int i;
-    for(i = 0; i < TLB_SIZE; i++){
-      if(!machine->tlb[i].valid){
-        machine->tlb[i] = translation_entry;
-        return;
-      }
-    }
-    i = rand() % TLB_SIZE;
-    ASSERT(0 <= i && i < TLB_SIZE);
-    currentThread->space->copyPage(i, machine->tlb[i].virtualPage);
-    machine->tlb[i] = translation_entry;
-}
-
 void
 IncrementPC()
 {
@@ -344,17 +330,18 @@ ExceptionHandler(ExceptionType which)
       int vpn = virtual_addr / PAGE_SIZE;
 
       if(virtual_addr < 0 || virtual_addr >= (currentThread->space->getNumPages() * PAGE_SIZE)){
-        printf("fuera de rango\n");
+        printf("Out of range!\n");
         machine->RaiseException(ADDRESS_ERROR_EXCEPTION, virtual_addr);
       }
       else {
         #ifdef USE_DML
         if(currentThread->space->getPageTable(vpn).physicalPage == -1)
-            currentThread->space->LoadPage(vpn);
+          currentThread->space->LoadPage(vpn);
         #endif
+
         #ifdef USE_TLB
         TranslationEntry te = currentThread->space->getPageTable(vpn);
-        insert_translation_entry(te);
+        currentThread->space->insertToTLB(te);
         #endif
 
       }

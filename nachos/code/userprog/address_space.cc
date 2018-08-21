@@ -282,3 +282,24 @@ void AddressSpace::RestoreState()
     machine->pageTableSize = numPages;
 #endif
 }
+
+#ifdef USE_TLB
+void
+AddressSpace::insertToTLB (TranslationEntry translation_entry)
+{
+    int i;
+    // First, we try to use an invalid tlb entry
+    for(i = 0; i < TLB_SIZE; i++){
+      if(!machine->tlb[i].valid){
+        machine->tlb[i] = translation_entry;
+        return;
+      }
+    }
+    // If all of them are valid, we select a random one
+    i = rand() % TLB_SIZE;
+    ASSERT(0 <= i && i < TLB_SIZE);
+
+    currentThread->space->copyPage(i, machine->tlb[i].virtualPage);
+    machine->tlb[i] = translation_entry;
+}
+#endif

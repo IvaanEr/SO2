@@ -51,6 +51,12 @@ public:
     unsigned getNumPages();
     TranslationEntry getPageTable(int i);
     void copyPage(int i, int virtual_address);
+
+    #ifdef USE_TLB
+    // Handling the TLB
+    void insertToTLB(TranslationEntry te);
+    #endif
+
 private:
 
     /// Assume linear page table translation for now!
