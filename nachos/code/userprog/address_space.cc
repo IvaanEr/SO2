@@ -259,8 +259,8 @@ void AddressSpace::SaveState()
     DEBUG('b', "Saving state (TLB)\n");
     unsigned i;
     for(i = 0; i < TLB_SIZE; i++){
-	    if(machine->tlb[i].dirty && machine->tlb[i].valid)
-            pageTable[machine->tlb[i].virtualPage] = machine->tlb[i];
+	    if(machine->tlb[i].valid)
+        pageTable[machine->tlb[i].virtualPage] = machine->tlb[i];
     }
 #endif
 }
