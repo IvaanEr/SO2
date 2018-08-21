@@ -56,8 +56,6 @@ public:
 
     unsigned Length() { Lseek(file, 0, 2); return Tell(file); }
 
-    void Caca() {printf ("CACACACACACA file: %d\n", file); printf("CACACACACA currentOffset: %d\n", currentOffset);}
-
 private:
     int file;
     unsigned currentOffset;
@@ -92,7 +90,6 @@ public:
     // Return the number of bytes in the file (this interface is simpler than
     // the UNIX idiom -- `lseek` to end of file, `tell`, `lseek` back).
     unsigned Length();
-    void Caca() {printf ("lala"); };
 
   private:
     FileHeader *hdr;  ///< Header for this file.

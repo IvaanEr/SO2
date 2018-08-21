@@ -36,7 +36,7 @@ Scheduler::~Scheduler()
     //for(int i = 0; i < PRIORITY_MAX; i++)
       //delete (readyList[i]);
     delete[] readyList;
-} 
+}
 
 /// Mark a thread as ready, but not running.
 /// Put it on the ready list, for later scheduling onto the CPU.
@@ -142,8 +142,8 @@ Scheduler::Print()
 {
     printf("Ready list contents:\n");
     for(int i = PRIORITY_MAX-1; i>=0; i--){
-      printf("Priority List nº: %d\n",i);       
+      printf("Priority List nº: %d\n",i);
       readyList[i].Apply(ThreadPrint);
     }
-    
+
 }

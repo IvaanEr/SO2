@@ -267,17 +267,12 @@ ExceptionHandler(ExceptionType which)
 
           case SC_Exit:
           {
-            //  printf("Exit 1\n");
              int end_code = machine -> ReadRegister(4);
-            //  printf("Exit 2 %d\n", end_code);
-             // Agrego esto para debuggin pero es costo computacional al pedo
+             // Agrego esto para debuggin
              SpaceId end_id = pidManager -> GetPid(currentThread);
              //////////////
-              // printf("Exit 3\n");
              DEBUG('p', "Process with pid %d exiting with status code: %d\n", end_id, end_code);
              currentThread -> returnValue = end_code;
-            //  printf("estoy por stats->print()\n\n");
-            //  stats -> Print();
              currentThread -> Finish();
              break;
           }

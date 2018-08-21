@@ -122,4 +122,3 @@ Machine::WriteRegister(unsigned num, int value)
     //DEBUG('m', "WriteRegister %u, value %d\n", num, value);
     registers[num] = value;
 }
-
