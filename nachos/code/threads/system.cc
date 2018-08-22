@@ -170,7 +170,7 @@ Initialize(int argc, char **argv)
     interrupt->Enable();
     CallOnUserAbort(Cleanup);  // If user hits ctl-C...
 
-    
+
 
     // Jose Miguel Santos Espino, 2007
     if (preemptiveScheduling) {

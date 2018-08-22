@@ -106,11 +106,6 @@ AddressSpace::AddressSpace(OpenFile *executable)
     // Save the executable for later
     exe = executable;
 
-    //int a = exe -> Length();
-    //printf("AddressSpace::Exe Length %d\n\n", a);
-
-    // AddressSpace::bitmap -> Print();
-
     exe->ReadAt((char *) &noffH, sizeof noffH, 0);
 
     if (noffH.noffMagic != NOFFMAGIC &&
@@ -139,27 +134,30 @@ AddressSpace::AddressSpace(OpenFile *executable)
 
     pageTable = new TranslationEntry[numPages];
     for (unsigned i = 0; i < numPages; i++) {
-        #ifdef USE_DML
-            pageTable[i].physicalPage  = -1;
-            pageTable[i].valid = false;
-        #else
-            // For now, virtual page number = physical page number. NO MORE!
-            pageTable[i].physicalPage = bitmap->Find();
-            ASSERT((int)pageTable[i].physicalPage != -1);
-            pageTable[i].valid        = true;
-        #endif
         // Always do:
         pageTable[i].virtualPage  = i;
         pageTable[i].use          = false;
         pageTable[i].dirty        = false;
         pageTable[i].readOnly     = false;
+        #ifdef USE_DML
+            pageTable[i].physicalPage  = -1;
+            pageTable[i].valid = false;
+        #else
+            // For now, virtual page number = physical page number. NO MORE!
+            #ifdef VMEM
+            pageTable[i].physicalPage = bitmap->Find(this, i);
+            #else
+            pageTable[i].physicalPage = bitmap->Find();
+            #endif
+            ASSERT((int)pageTable[i].physicalPage != -1);
+            pageTable[i].valid        = true;
+        #endif
           // If the code segment was entirely on a separate page, we could
           // set its pages to be read-only.
         #ifndef USE_DML
             bzero(&machine ->mainMemory[pageTable[i].physicalPage * PAGE_SIZE], PAGE_SIZE);
         #endif
     }
-    // bitmap -> Print();
 #ifndef USE_DML
     for(int j=0; j<noffH.code.size;j++){
         char c;
