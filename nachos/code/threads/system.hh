@@ -42,6 +42,15 @@ extern SynchConsole* synchConsole;
 extern PidManager* pidManager;
 #endif
 
+#ifdef VMEM
+#include "vmem/coremap.hh"
+extern CoreMap *bitmap;
+#else
+#include "userprog/bitmap.hh"
+#include "machine/machine.hh"
+extern BitMap *bitmap;
+#endif
+
 #ifdef FILESYS_NEEDED  // *FILESYS* or 8FILESYS_STUB*.
 #include "filesys/file_system.hh"
 extern FileSystem *fileSystem;

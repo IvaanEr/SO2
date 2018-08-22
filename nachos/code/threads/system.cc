@@ -40,7 +40,12 @@ SynchDisk *synchDisk;
 Machine *machine;  ///< User program memory and registers.
 SynchConsole *synchConsole;
 PidManager *pidManager;
+#endif
 
+#ifdef VMEM
+CoreMap *bitmap;
+#else
+BitMap *bitmap;
 #endif
 
 #ifdef NETWORK
@@ -180,12 +185,19 @@ Initialize(int argc, char **argv)
 
 #ifdef USER_PROGRAM
 
-  
+
     machine = new Machine(debugUserProg);  // This must come first.
     //Inicializamos la consola
     synchConsole = new SynchConsole(NULL,NULL);
     pidManager = new PidManager();
+  #ifdef VMEM
+    bitmap = new CoreMap(NUM_PHYS_PAGES);
+  #else
+    bitmap = new BitMap(NUM_PHYS_PAGES);
+  #endif
+
 #endif
+
 
 #ifdef FILESYS
     synchDisk = new SynchDisk("DISK");

@@ -20,7 +20,6 @@
 #include "bin/noff.h"
 #include "threads/system.hh"
 
-BitMap *AddressSpace::bitmap = new BitMap(NUM_PHYS_PAGES);
 /// Do little endian to big endian conversion on the bytes in the object file
 /// header, in case the file was generated on a little endian machine, and we
 /// are re now running on a big endian machine.
@@ -76,7 +75,11 @@ void AddressSpace::LoadPage(int vpage)
 {
     // unsigned int vpage = vaddr / PAGE_SIZE;
 
+    #ifdef VMEM
+    int ppage = bitmap->Find(this, vpage);
+    #else
     int ppage = bitmap->Find();
+    #endif
     ASSERT(ppage >= 0);
 
     for (int bytes = 0; bytes < PAGE_SIZE; bytes++) {
