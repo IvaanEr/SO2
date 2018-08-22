@@ -52,6 +52,8 @@ public:
     void insertToTLB(TranslationEntry te);
     #endif
 
+    void SaveToSwap(int vpn){return;};
+
 private:
 
     /// Assume linear page table translation for now!
