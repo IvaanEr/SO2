@@ -45,6 +45,7 @@ public:
 
     unsigned getNumPages();
     TranslationEntry getPageTable(int i);
+    void putPhysPage(int where, int physPage);
     void copyPage(int i, int virtual_address);
 
     #ifdef USE_TLB
@@ -52,8 +53,8 @@ public:
     void insertToTLB(TranslationEntry te);
     #endif
 
-    void SaveToSwap(int vpn){return;};
-
+    void SaveToSwap(int vpn);
+    void LoadFromSwap(int vpn);
 private:
 
     /// Assume linear page table translation for now!
@@ -61,10 +62,12 @@ private:
 
     /// Number of pages in the virtual address space.
     unsigned numPages;
-
     /// For demand loading
     OpenFile *exe;
     NoffHeader noffH;
+
+    // For swap pages
+    OpenFile* swap;
 
 };
 #endif

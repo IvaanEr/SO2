@@ -338,7 +338,14 @@ ExceptionHandler(ExceptionType which)
         if(currentThread->space->getPageTable(vpn).physicalPage == -1)
           currentThread->space->LoadPage(vpn);
         #endif
-
+        #ifdef VMEM
+        TranslationEntry exception = currentThread->space->getPageTable(vpn);
+        if(exception.physicalPage == -2){
+          int free_page = bitmap->Find(currentThread->space, vpn);
+          currentThread->space->putPhysPage(vpn, free_page);
+          currentThread->space->LoadFromSwap(vpn);
+        }
+        #endif
         #ifdef USE_TLB
         TranslationEntry te = currentThread->space->getPageTable(vpn);
         currentThread->space->insertToTLB(te);

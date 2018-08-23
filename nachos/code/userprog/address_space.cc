@@ -65,6 +65,10 @@ AddressSpace::getPageTable(int i)
     return pageTable[i];
 }
 
+void AddressSpace::putPhysPage(int where, int physPage){
+    pageTable[where].physicalPage = physPage;  
+}
+
 void
 AddressSpace::copyPage(int i, int virtual_address)
 {
@@ -101,6 +105,34 @@ void AddressSpace::LoadPage(int vpage)
     pageTable[vpage].physicalPage = ppage;
     pageTable[vpage].valid = true;
 }
+ 
+/**
+ * El SO se dará cuenta que una página está en swap cuando:
+ * haya una falla de TLB y la entrada correspondiente sea -2
+ * TLB Miss → ppn >= 0 → TLB Miss Real (está en memoria)
+ *            ppn == -1 → Cargar del binario (si hay DML)
+ *            ppn == -2 → Está en swap
+ */
+void
+AddressSpace::SaveToSwap(int vpn) {
+    int ppn = pageTable[vpn].physicalPage;
+    swap -> WriteAt(&machine->mainMemory[ppn * PAGE_SIZE],
+                    PAGE_SIZE, vpn*PAGE_SIZE);
+    
+    // Invalidar la entrada de la TLB sí está en valid true.
+    if(machine->tlb[vpn].valid)
+        machine->tlb[vpn].valid = false;
+    
+    // Actualiza la PageTable con -2
+    pageTable[vpn].physicalPage = -2;
+}
+
+void
+AddressSpace::LoadFromSwap(int vpn) {
+    int inFileAddr = vpn * PAGE_SIZE;
+    int phys_addre = pageTable[vpn].physicalPage * PAGE_SIZE;
+    swap -> ReadAt(&machine->mainMemory[phys_addre], PAGE_SIZE, inFileAddr);
+}
 
 AddressSpace::AddressSpace(OpenFile *executable)
 {
@@ -108,6 +140,14 @@ AddressSpace::AddressSpace(OpenFile *executable)
     ASSERT(executable);
     // Save the executable for later
     exe = executable;
+
+    #ifdef VMEM
+    // Open swap storage
+    char name[50];
+    sprintf(name, "%s.swap", currentThread->getName());
+    fileSystem->Create(name, numPages * PAGE_SIZE);
+    swap = fileSystem->Open(name);
+    #endif
 
     exe->ReadAt((char *) &noffH, sizeof noffH, 0);
 
