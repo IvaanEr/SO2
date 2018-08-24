@@ -66,7 +66,7 @@ AddressSpace::getPageTable(int i)
 }
 
 void AddressSpace::putPhysPage(int where, int physPage){
-    pageTable[where].physicalPage = physPage;  
+    pageTable[where].physicalPage = physPage;
 }
 
 void
@@ -105,7 +105,7 @@ void AddressSpace::LoadPage(int vpage)
     pageTable[vpage].physicalPage = ppage;
     pageTable[vpage].valid = true;
 }
- 
+
 /**
  * El SO se dará cuenta que una página está en swap cuando:
  * haya una falla de TLB y la entrada correspondiente sea -2
@@ -118,11 +118,11 @@ AddressSpace::SaveToSwap(int vpn) {
     int ppn = pageTable[vpn].physicalPage;
     swap -> WriteAt(&machine->mainMemory[ppn * PAGE_SIZE],
                     PAGE_SIZE, vpn*PAGE_SIZE);
-    
+
     // Invalidar la entrada de la TLB sí está en valid true.
     if(machine->tlb[vpn].valid)
         machine->tlb[vpn].valid = false;
-    
+
     // Actualiza la PageTable con -2
     pageTable[vpn].physicalPage = -2;
 }
@@ -164,9 +164,14 @@ AddressSpace::AddressSpace(OpenFile *executable)
     numPages = divRoundUp(size, PAGE_SIZE);
     size = numPages * PAGE_SIZE;
 
+    #ifndef VMEM
     ASSERT(numPages <= NUM_PHYS_PAGES);
       // Check we are not trying to run anything too big -- at least until we
       // have virtual memory.
+    #else
+    if(NUM_PHYS_PAGES < numPages)
+      printf("More pages than NUM_PHYS_PAGES. Will use swap.\n");
+    #endif
 
     DEBUG('a', "Initializing address space, num pages %u, size %u\n",
           numPages, size);

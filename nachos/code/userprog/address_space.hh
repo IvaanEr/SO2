@@ -18,7 +18,7 @@
 #include "machine/translation_entry.hh"
 #include <string.h> //to use bzero
 
-const unsigned USER_STACK_SIZE = 4096;  ///< Increase this as necessary!
+const unsigned USER_STACK_SIZE = 1024;  ///< Increase this as necessary!
 
 
 class AddressSpace {

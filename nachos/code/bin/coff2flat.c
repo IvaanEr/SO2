@@ -28,7 +28,7 @@
 
 // NOTE -- once you have implemented large files, it is ok to make this
 // bigger!
-#define STACK_SIZE              4096  // In bytes.
+#define STACK_SIZE              1024  // In bytes.
 #define ReadStructOrDie(fd, s)  ReadOrDie(fd, (char *) &(s), sizeof (s))
 
 /// Read and check for error.
