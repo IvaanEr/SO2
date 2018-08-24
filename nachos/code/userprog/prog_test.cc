@@ -28,7 +28,7 @@ StartProcess(const char *filename)
         printf("Unable to open file %s\n", filename);
         return;
     }
-    space = new AddressSpace(executable);
+    space = new AddressSpace(executable,42);
     currentThread->space = space;
 
     //delete executable;

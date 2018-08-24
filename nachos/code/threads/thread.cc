@@ -80,7 +80,7 @@ Thread::~Thread()
         DeallocBoundedArray((char *) stack, STACK_SIZE * sizeof *stack);
 
 #ifdef USER_PROGRAM
-    delete (this -> space);
+    delete (space);
 #endif
 
 //    if(CanCallJoin)

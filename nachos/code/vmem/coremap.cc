@@ -35,7 +35,7 @@ int
 CoreMap::SelectVictim()
 {
   int victim = nextVictim;
-  nextVictim %= length;
+  nextVictim = (nextVictim+1) % length;
   return victim;
 }
 

@@ -28,7 +28,7 @@ public:
     /// the file `executable`.
     ///
     /// * `executable` is the open file that corresponds to the program.
-    AddressSpace(OpenFile *executable);
+    AddressSpace(OpenFile *executable, int pid);
 
     /// De-allocate an address space.
     ~AddressSpace();
@@ -55,6 +55,12 @@ public:
 
     void SaveToSwap(int vpn);
     void LoadFromSwap(int vpn);
+
+    void Print(){
+      printf("Page table:\n");
+      for(int i = 0; i<numPages; i++)
+        printf("[%d -> %d] \n",i, pageTable[i].physicalPage);
+    };
 private:
 
     /// Assume linear page table translation for now!

@@ -282,7 +282,7 @@ ExceptionHandler(ExceptionType which)
               exe_thread -> Fork(StartProc, argv);
               SpaceId pid_hijo = pidManager->AddPid(exe_thread);
 
-              AddressSpace *exe_space =  new AddressSpace(exe);
+              AddressSpace *exe_space =  new AddressSpace(exe, pid_hijo);
               exe_thread -> space = exe_space;
 
               DEBUG('p', "Executing binary %s with id %d\n", name, pid_hijo);
@@ -335,18 +335,22 @@ ExceptionHandler(ExceptionType which)
       }
       else {
         #ifdef USE_DML
-        if(currentThread->space->getPageTable(vpn).physicalPage == -1)
+        if(currentThread->space->getPageTable(vpn).physicalPage == -1){
+          printf("Im in the -1 if. \n");
           currentThread->space->LoadPage(vpn);
+        }
         #endif
         #ifdef VMEM
         TranslationEntry exception = currentThread->space->getPageTable(vpn);
         if(exception.physicalPage == -2){
+          printf("Im in the -2 if. \n");
           int free_page = bitmap->Find(currentThread->space, vpn);
           currentThread->space->putPhysPage(vpn, free_page);
           currentThread->space->LoadFromSwap(vpn);
         }
         #endif
         #ifdef USE_TLB
+        // printf("Writing to TLB: %d\n", vpn);
         TranslationEntry te = currentThread->space->getPageTable(vpn);
         currentThread->space->insertToTLB(te);
         #endif

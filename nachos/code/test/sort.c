@@ -10,7 +10,7 @@
 // #include "../userprog/syscall.h"
 
 
-#define DIM  100
+#define DIM  1000
 
 /// Size of physical memory; with code, we will run out of space!
 static int A[DIM];

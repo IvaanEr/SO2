@@ -15,6 +15,7 @@
 /// All rights reserved.  S ee `copyright.h` for copyright notice and
 /// limitation of liability and disclaimer of warranty provisions.
 
+#include <time.h>
 
 #include "address_space.hh"
 #include "bin/noff.h"
@@ -86,6 +87,9 @@ void AddressSpace::LoadPage(int vpage)
     #endif
     ASSERT(ppage >= 0);
 
+    bitmap -> Print();
+    Print();
+
     for (int bytes = 0; bytes < PAGE_SIZE; bytes++) {
         int vaddr = vpage * PAGE_SIZE + bytes;
         int paddr = ppage * PAGE_SIZE + bytes;
@@ -104,6 +108,7 @@ void AddressSpace::LoadPage(int vpage)
     }
     pageTable[vpage].physicalPage = ppage;
     pageTable[vpage].valid = true;
+    printf("Finished LoadPage\n");
 }
 
 /**
@@ -124,7 +129,10 @@ AddressSpace::SaveToSwap(int vpn) {
         machine->tlb[vpn].valid = false;
 
     // Actualiza la PageTable con -2
+    printf("La pagina virtual %d que estaba en la fisica %d ahora tiene -2\n",
+      vpn, pageTable[vpn].physicalPage);
     pageTable[vpn].physicalPage = -2;
+    pageTable[vpn].valid = false;
 }
 
 void
@@ -134,7 +142,7 @@ AddressSpace::LoadFromSwap(int vpn) {
     swap -> ReadAt(&machine->mainMemory[phys_addre], PAGE_SIZE, inFileAddr);
 }
 
-AddressSpace::AddressSpace(OpenFile *executable)
+AddressSpace::AddressSpace(OpenFile *executable, int pid)
 {
     unsigned   size;
     ASSERT(executable);
@@ -144,7 +152,8 @@ AddressSpace::AddressSpace(OpenFile *executable)
     #ifdef VMEM
     // Open swap storage
     char name[50];
-    sprintf(name, "%s.swap", currentThread->getName());
+    srand(time(NULL));
+    sprintf(name, "SWAP.%d.%d", pid, rand()%100);
     fileSystem->Create(name, numPages * PAGE_SIZE);
     swap = fileSystem->Open(name);
     #endif
@@ -198,7 +207,7 @@ AddressSpace::AddressSpace(OpenFile *executable)
             pageTable[i].physicalPage = bitmap->Find();
             #endif
             ASSERT((int)pageTable[i].physicalPage != -1);
-            pageTable[i].valid        = true;
+            pageTable[i].valid = true;
         #endif
           // If the code segment was entirely on a separate page, we could
           // set its pages to be read-only.
@@ -260,11 +269,12 @@ AddressSpace::AddressSpace(OpenFile *executable)
 /// Nothing for now!
 AddressSpace::~AddressSpace()
 {
-    #ifndef USE_TLB
-        for (unsigned i = 0; i < numPages; i++)
-            bitmap -> Clear(pageTable[i].physicalPage);
-        delete [] pageTable;
-    #endif
+    for (unsigned i = 0; i < numPages; i++) {
+      if(pageTable[i].valid)
+        bitmap -> Clear(pageTable[i].physicalPage);
+    }
+    delete [] pageTable;
+    delete swap;
     delete exe;
 }
 
