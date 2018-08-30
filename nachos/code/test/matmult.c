@@ -37,5 +37,6 @@ main(void)
 
     // Halt();
     // And then we are done.
+    Write("Finished matmult!\n",18,ConsoleOutput);
     Exit(C[DIM - 1][DIM - 1]);
 }

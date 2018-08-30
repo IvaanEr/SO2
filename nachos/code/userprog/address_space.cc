@@ -87,9 +87,6 @@ void AddressSpace::LoadPage(int vpage)
     #endif
     ASSERT(ppage >= 0);
 
-    bitmap -> Print();
-    Print();
-
     for (int bytes = 0; bytes < PAGE_SIZE; bytes++) {
         int vaddr = vpage * PAGE_SIZE + bytes;
         int paddr = ppage * PAGE_SIZE + bytes;
@@ -108,7 +105,6 @@ void AddressSpace::LoadPage(int vpage)
     }
     pageTable[vpage].physicalPage = ppage;
     pageTable[vpage].valid = true;
-    printf("Finished LoadPage\n");
 }
 
 /**
