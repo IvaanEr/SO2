@@ -121,12 +121,14 @@ AddressSpace::SaveToSwap(int vpn) {
                     PAGE_SIZE, vpn*PAGE_SIZE);
 
     // Invalidar la entrada de la TLB sí está en valid true.
-    if(machine->tlb[vpn].valid)
-        machine->tlb[vpn].valid = false;
+    for (int i = 0; i < TLB_SIZE; i++){
+      if(machine->tlb[i].virtualPage == vpn){
+        machine->tlb[i].valid = false;
+        break;
+      }
+    }
 
     // Actualiza la PageTable con -2
-    printf("La pagina virtual %d que estaba en la fisica %d ahora tiene -2\n",
-      vpn, pageTable[vpn].physicalPage);
     pageTable[vpn].physicalPage = -2;
     pageTable[vpn].valid = false;
 }
@@ -134,6 +136,7 @@ AddressSpace::SaveToSwap(int vpn) {
 void
 AddressSpace::LoadFromSwap(int vpn) {
     int inFileAddr = vpn * PAGE_SIZE;
+    pageTable[vpn].valid = true;
     int phys_addre = pageTable[vpn].physicalPage * PAGE_SIZE;
     swap -> ReadAt(&machine->mainMemory[phys_addre], PAGE_SIZE, inFileAddr);
 }
