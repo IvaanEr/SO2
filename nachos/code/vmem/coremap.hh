@@ -12,7 +12,7 @@ class CoreMap : public BitMap {
 
     int Find(AddressSpace *o, int vpn);
 
-    void UpdateUsage(int ppage);
+    void UpdateAge(int ppage);
 
   private:
     AddressSpace *owner[NUM_PHYS_PAGES];
