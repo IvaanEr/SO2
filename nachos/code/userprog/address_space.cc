@@ -61,13 +61,9 @@ AddressSpace::getNumPages()
 }
 
 TranslationEntry
-AddressSpace::getPageTable(int i)
+AddressSpace::getTableEntry(int i)
 {
     return pageTable[i];
-}
-
-void AddressSpace::putPhysPage(int where, int physPage){
-    pageTable[where].physicalPage = physPage;
 }
 
 void
@@ -78,8 +74,6 @@ AddressSpace::copyPage(int i, int virtual_address)
 
 void AddressSpace::LoadPage(int vpage)
 {
-    // unsigned int vpage = vaddr / PAGE_SIZE;
-
     #ifdef VMEM
     int ppage = coremap->Find(this, vpage);
     #else
@@ -134,11 +128,12 @@ AddressSpace::SaveToSwap(int vpn) {
 }
 
 void
-AddressSpace::LoadFromSwap(int vpn) {
-    int inFileAddr = vpn * PAGE_SIZE;
+AddressSpace::LoadFromSwap(int vpn, int ppn) {
+    pageTable[vpn].physicalPage = ppn;
     pageTable[vpn].valid = true;
-    int phys_addre = pageTable[vpn].physicalPage * PAGE_SIZE;
-    swap -> ReadAt(&machine->mainMemory[phys_addre], PAGE_SIZE, inFileAddr);
+    int inFileAddr = vpn * PAGE_SIZE;
+    int inMemAddr = ppn * PAGE_SIZE;
+    swap -> ReadAt(&machine->mainMemory[inMemAddr], PAGE_SIZE, inFileAddr);
 }
 
 AddressSpace::AddressSpace(OpenFile *executable, int pid)

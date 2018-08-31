@@ -44,8 +44,7 @@ public:
     void RestoreState();
 
     unsigned getNumPages();
-    TranslationEntry getPageTable(int i);
-    void putPhysPage(int where, int physPage);
+    TranslationEntry getTableEntry(int i);
     void copyPage(int i, int virtual_address);
 
     #ifdef USE_TLB
@@ -54,7 +53,7 @@ public:
     #endif
 
     void SaveToSwap(int vpn);
-    void LoadFromSwap(int vpn);
+    void LoadFromSwap(int vpn, int ppn);
 
     void Print(){
       printf("Page table:\n");

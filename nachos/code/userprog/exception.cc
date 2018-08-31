@@ -323,30 +323,34 @@ ExceptionHandler(ExceptionType which)
       IncrementPC();
     }
     else if (which == PAGE_FAULT_EXCEPTION) {
-      DEBUG('a', "Page Fault Exception \n");
       int virtual_addr = machine->ReadRegister(BAD_VADDR_REG);
       int vpn = virtual_addr / PAGE_SIZE;
 
-      if(virtual_addr < 0 || virtual_addr >= (currentThread->space->getNumPages() * PAGE_SIZE)){
+      AddressSpace * current_space = currentThread -> space;
+
+      DEBUG('a', "Page Fault Exception \n");
+
+      if(virtual_addr < 0 || virtual_addr >= (current_space->getNumPages() * PAGE_SIZE)){
         printf("Out of range!\n");
         machine->RaiseException(ADDRESS_ERROR_EXCEPTION, virtual_addr);
       }
       else {
+
         #ifdef USE_DML
-        if(currentThread->space->getPageTable(vpn).physicalPage == -1){
-          currentThread->space->LoadPage(vpn);
+        if(current_space->getTableEntry(vpn).physicalPage == -1){
+          current_space->LoadPage(vpn);
         }
         #endif
+
         #ifdef VMEM
-        if(currentThread->space->getPageTable(vpn).physicalPage == -2){
+        if(current_space->getTableEntry(vpn).physicalPage == -2){
           int free_page = coremap->Find(currentThread->space, vpn);
-          currentThread->space->putPhysPage(vpn, free_page);
-          currentThread->space->LoadFromSwap(vpn);
+          current_space->LoadFromSwap(vpn, free_page);
         }
         #endif
+
         #ifdef USE_TLB
-        TranslationEntry te = currentThread->space->getPageTable(vpn);
-        currentThread->space->insertToTLB(te);
+        current_space->insertToTLB(current_space->getTableEntry(vpn));
         #endif
 
       }
