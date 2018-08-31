@@ -81,7 +81,7 @@ void AddressSpace::LoadPage(int vpage)
     // unsigned int vpage = vaddr / PAGE_SIZE;
 
     #ifdef VMEM
-    int ppage = bitmap->Find(this, vpage);
+    int ppage = coremap->Find(this, vpage);
     #else
     int ppage = bitmap->Find();
     #endif
@@ -201,7 +201,7 @@ AddressSpace::AddressSpace(OpenFile *executable, int pid)
         #else
             // For now, virtual page number = physical page number. NO MORE!
             #ifdef VMEM
-            pageTable[i].physicalPage = bitmap->Find(this, i);
+            pageTable[i].physicalPage = coremap->Find(this, i);
             #else
             pageTable[i].physicalPage = bitmap->Find();
             #endif
@@ -268,9 +268,14 @@ AddressSpace::AddressSpace(OpenFile *executable, int pid)
 /// Nothing for now!
 AddressSpace::~AddressSpace()
 {
+
     for (unsigned i = 0; i < numPages; i++) {
       if(pageTable[i].valid)
+      #ifdef VMEM
+        coremap -> Clear(pageTable[i].physicalPage);
+      #else
         bitmap -> Clear(pageTable[i].physicalPage);
+      #endif
     }
     delete [] pageTable;
     delete swap;

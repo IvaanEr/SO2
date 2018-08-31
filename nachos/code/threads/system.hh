@@ -44,7 +44,7 @@ extern PidManager* pidManager;
 
 #ifdef VMEM
 #include "vmem/coremap.hh"
-extern CoreMap *bitmap;
+extern CoreMap *coremap;
 #else
 #include "userprog/bitmap.hh"
 #include "machine/machine.hh"

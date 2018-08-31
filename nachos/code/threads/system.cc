@@ -43,7 +43,7 @@ PidManager *pidManager;
 #endif
 
 #ifdef VMEM
-CoreMap *bitmap;
+CoreMap *coremap;
 #else
 BitMap *bitmap;
 #endif
@@ -191,7 +191,7 @@ Initialize(int argc, char **argv)
     synchConsole = new SynchConsole(NULL,NULL);
     pidManager = new PidManager();
   #ifdef VMEM
-    bitmap = new CoreMap(NUM_PHYS_PAGES);
+    coremap = new CoreMap(NUM_PHYS_PAGES);
   #else
     bitmap = new BitMap(NUM_PHYS_PAGES);
   #endif

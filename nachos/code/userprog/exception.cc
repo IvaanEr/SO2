@@ -341,7 +341,7 @@ ExceptionHandler(ExceptionType which)
         #endif
         #ifdef VMEM
         if(currentThread->space->getPageTable(vpn).physicalPage == -2){
-          int free_page = bitmap->Find(currentThread->space, vpn);
+          int free_page = coremap->Find(currentThread->space, vpn);
           currentThread->space->putPhysPage(vpn, free_page);
           currentThread->space->LoadFromSwap(vpn);
         }
