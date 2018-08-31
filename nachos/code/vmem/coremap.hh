@@ -25,9 +25,6 @@ class CoreMap : public BitMap {
     int length;
 
     // LRU policy
-    // This implementation of LRU has the problem the 'int' used for
-    // representing the age of the page, will overflow after several
-    // runs.
     int LRU();
     void ResetAge();
     void AvoidOverflow();
