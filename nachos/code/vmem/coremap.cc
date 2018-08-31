@@ -15,6 +15,8 @@ CoreMap::CoreMap(int n) : BitMap (n)
 
   // LRU policy
   age = 0;
+  for (int i = 0; i < NUM_PHYS_PAGES; i++)
+    pageAge[i] = 0;
 }
 
 CoreMap::~CoreMap(){}
@@ -71,8 +73,24 @@ CoreMap::LRU()
 }
 
 void
+CoreMap::ResetAge()
+{
+  age = 0;
+  for (int i = 0; i < NUM_PHYS_PAGES; i++)
+    pageAge[i] = 0;
+}
+
+void
+CoreMap::AvoidOverflow()
+{
+    if (age == 1000000)
+      ResetAge();
+}
+
+void
 CoreMap::UpdateAge(int ppage)
 {
+  AvoidOverflow();
   pageAge[ppage] = age;
   age++;
 }

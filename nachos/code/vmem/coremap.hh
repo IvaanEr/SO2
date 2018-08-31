@@ -29,7 +29,8 @@ class CoreMap : public BitMap {
     // representing the age of the page, will overflow after several
     // runs.
     int LRU();
-    void resetAge();
+    void ResetAge();
+    void AvoidOverflow();
     int age;
     int pageAge[NUM_PHYS_PAGES];
 };
