@@ -4,13 +4,20 @@
 
 CoreMap::CoreMap(int n) : BitMap (n)
 {
+  #ifdef LRU_POLICY
+  printf("Using LRU policy for SWAP.\n");
+  #else
+  printf("Using FIFO policy for SWAP.\n");
+  #endif
+
   nextVictim = 0;
   length = n;
+
+  // LRU policy
+  age = 0;
 }
 
-CoreMap::~CoreMap()
-{
-}
+CoreMap::~CoreMap(){}
 
 int
 CoreMap::Find(AddressSpace *o, int vpn )
@@ -34,9 +41,39 @@ CoreMap::Find(AddressSpace *o, int vpn )
 int
 CoreMap::SelectVictim()
 {
+  #ifdef LRU_POLICY
+  return LRU();
+  #else
+  return FIFO();
+  #endif
+}
+
+int
+CoreMap::FIFO()
+{
   int victim = nextVictim;
   nextVictim = (nextVictim+1) % length;
   return victim;
 }
 
+int
+CoreMap::LRU()
+{
+  int min_pos = 0;
+  int min_val = pageUsage[0];
+  for (int i = 0; i < NUM_PHYS_PAGES; i++){
+    if (pageUsage[i]<min_val){
+      min_pos = i;
+      min_val = pageUsage[i];
+    }
+  }
+  return min_pos;
+}
+
+void
+CoreMap::UpdateUsage(int ppage)
+{
+  pageUsage[ppage] = age;
+  age++;
+}
 #endif

@@ -93,6 +93,7 @@ Machine::ReadMem(unsigned addr, unsigned size, int *value)
     int           data;
     ExceptionType exception;
     unsigned      physicalAddress;
+    int ppage;
 
     DEBUG('a', "Reading VA 0x%X, size %u\n", addr, size);
 
@@ -101,6 +102,12 @@ Machine::ReadMem(unsigned addr, unsigned size, int *value)
         machine->RaiseException(exception, addr);
         return false;
     }
+
+    #ifdef LRU_POLICY
+    ppage = physicalAddress / PAGE_SIZE;
+    coremap-> UpdateUsage(ppage);
+    #endif
+
     switch (size) {
         case 1:
             data = machine->mainMemory[physicalAddress];
@@ -138,6 +145,7 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
 {
     ExceptionType exception;
     unsigned      physicalAddress;
+    int ppage;
 
     DEBUG('a', "Writing VA 0x%X, size %u, value 0x%X\n", addr, size, value);
 
@@ -146,6 +154,12 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
         machine->RaiseException(exception, addr);
         return false;
     }
+
+    #ifdef LRU_POLICY
+    ppage = physicalAddress / PAGE_SIZE;
+    coremap-> UpdateUsage(ppage);
+    #endif
+
     switch (size) {
         case 1:
             machine->mainMemory[physicalAddress]

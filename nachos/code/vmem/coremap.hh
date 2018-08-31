@@ -4,27 +4,33 @@
 #include "userprog/address_space.hh"
 #include "machine/machine.hh"
 #include "bitmap.hh"
-// #include "system.hh"
-
-// class AddressSpace;
 
 class CoreMap : public BitMap {
   public:
      CoreMap(int length);
     ~CoreMap();
-    // void Map(unsigned int phys, TranslationEntry *virt, AddrSpace *s);
-    // void Unmap(unsigned int phys);
 
     int Find(AddressSpace *o, int vpn);
+
+    void UpdateUsage(int ppage);
 
   private:
     AddressSpace *owner[NUM_PHYS_PAGES];
     int ppnToVpn[NUM_PHYS_PAGES];
-
-    // Right now we have FIFO policy
     int SelectVictim();
+
+    // FIFO policy
+    int FIFO();
     int nextVictim;
     int length;
+
+    // LRU policy
+    // This implementation of LRU has the problem the 'int' used for
+    // representing the age of the page, will overflow after several
+    // runs.
+    int LRU();
+    int age;
+    int pageUsage[NUM_PHYS_PAGES];
 };
 
 #endif
