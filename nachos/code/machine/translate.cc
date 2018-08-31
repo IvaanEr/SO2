@@ -237,7 +237,6 @@ Machine::Translate(unsigned virtAddr, unsigned *physAddr,
         for (entry = NULL, i = 0; i < TLB_SIZE; i++)
             if (tlb[i].valid && tlb[i].virtualPage == vpn) {
                 stats -> tlbHits++;
-                // printf("##### ENTRE A VALID");
                 entry = &tlb[i];  // FOUND!
                 break;
             }

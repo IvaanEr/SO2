@@ -301,14 +301,12 @@ ExceptionHandler(ExceptionType which)
              SpaceId pid_hijo = machine -> ReadRegister(4);
              Thread *t        = pidManager -> GetThread(pid_hijo);
              const char *name = t->getName();
-            //  printf("Joining %s \n", name);
              if (t) {
-              //  printf("entre el if\n");
                DEBUG('p', "Waiting for process %d to finish\n", pid_hijo);
                int end_code = t -> Join();
                pidManager -> RemovePid(t);
                machine -> WriteRegister(2, end_code);
-           //  DEBUG('p', "Process %d returned %d\n", pid_hijo, end_code);
+               DEBUG('p', "Process %d returned %d\n", pid_hijo, end_code);
              } else {
 
                DEBUG('p', "[Error] Could not join process %d\n", pid_hijo);
