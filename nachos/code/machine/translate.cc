@@ -105,7 +105,7 @@ Machine::ReadMem(unsigned addr, unsigned size, int *value)
 
     #ifdef LRU_POLICY
     ppage = physicalAddress / PAGE_SIZE;
-    coremap-> UpdateUsage(ppage);
+    coremap-> UpdateAge(ppage);
     #endif
 
     switch (size) {
@@ -157,7 +157,7 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
 
     #ifdef LRU_POLICY
     ppage = physicalAddress / PAGE_SIZE;
-    coremap-> UpdateUsage(ppage);
+    coremap-> UpdateAge(ppage);
     #endif
 
     switch (size) {

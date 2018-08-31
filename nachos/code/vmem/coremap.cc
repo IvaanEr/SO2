@@ -60,20 +60,20 @@ int
 CoreMap::LRU()
 {
   int min_pos = 0;
-  int min_val = pageUsage[0];
+  int min_val = pageAge[0];
   for (int i = 0; i < NUM_PHYS_PAGES; i++){
-    if (pageUsage[i]<min_val){
+    if (pageAge[i]<min_val){
       min_pos = i;
-      min_val = pageUsage[i];
+      min_val = pageAge[i];
     }
   }
   return min_pos;
 }
 
 void
-CoreMap::UpdateUsage(int ppage)
+CoreMap::UpdateAge(int ppage)
 {
-  pageUsage[ppage] = age;
+  pageAge[ppage] = age;
   age++;
 }
 #endif
