@@ -47,7 +47,7 @@ enum ExceptionType {
     OVERFLOW_EXCEPTION,       // Integer overflow in `add` or `sub`.
     ILLEGAL_INSTR_EXCEPTION,  // Unimplemented or reserved instruction.
     NUM_EXCEPTION_TYPES
-};
+  };
 
 // User program CPU state.  The full set of MIPS registers, plus a few
 // more because we need to be able to start/stop a user program between

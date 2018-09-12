@@ -63,7 +63,9 @@ ReadStringFromUser(int userAddress, char *outString, unsigned maxByteCount)
 
 	do{
       if(!machine->ReadMem(userAddress+i,1,&c)){
-        ASSERT(machine->ReadMem(userAddress+i,1,&c));
+        if(!machine->ReadMem(userAddress+i,1,&c)){
+          ASSERT(machine->ReadMem(userAddress+i,1,&c));
+        }
       }      // DEBUG('p', "Estamos en ReadString. Leimos: %c\n", c);
 			outString[i] = (char) c;
 			i++;
@@ -81,7 +83,9 @@ ReadBufferFromUser(int userAddress, char *outBuffer, unsigned byteCount)
 	for(i = 0; i<byteCount; i++){
 
 		if(!machine->ReadMem(userAddress+i, 1, &c)){
-      ASSERT(machine->ReadMem(userAddress+i, 1, &c));
+        if(!machine->ReadMem(userAddress+i,1,&c)){
+          ASSERT(machine->ReadMem(userAddress+i, 1, &c));
+      }
     }
 		outBuffer[i] = c;
 	}
@@ -94,7 +98,9 @@ WriteStringToUser(const char *string, int userAddress)
   unsigned i=0;
   do {
     if(!machine->WriteMem(userAddress+i, 1, string[i])){
-		  ASSERT(machine->WriteMem(userAddress+i, 1, string[i]));
+      if(!machine->WriteMem(userAddress+i, 1, string[i])){
+		    // ASSERT(machine->WriteMem(userAddress+i, 1, string[i]));
+      }
     }
     i++;
   } while(string[i-1] != '\0'); // Primero copio y después comparo para no dejar afuera al terminador
@@ -105,7 +111,9 @@ WriteBufferToUser(const char *buffer, int userAddress,unsigned byteCount)
 {
 	for (unsigned i = 0; i < byteCount; i++)
     if(!machine->WriteMem(userAddress+i, 1, buffer[i])){
-      ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
+      if(!machine->WriteMem(userAddress+i, 1, buffer[i])){    
+        // ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
+      }
     }
 }
 
@@ -353,7 +361,14 @@ ExceptionHandler(ExceptionType which)
         current_space->insertToTLB(current_space->getTableEntry(vpn));
         #endif
 
+        #ifdef LRU_POLICY
+          int ppage = current_space->getTableEntry(vpn).physicalPage;
+          coremap-> UpdateAge(ppage);
+          TranslationEntry *pT = currentThread->space->getPageTable();
+          pT[vpn].valid = true;
+        #endif
       }
+
     }
     else {
          printf("Unexpected user mode exception %d %d\n", which, type);

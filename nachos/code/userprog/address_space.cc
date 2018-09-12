@@ -66,6 +66,12 @@ AddressSpace::getTableEntry(int i)
     return pageTable[i];
 }
 
+TranslationEntry *
+AddressSpace::getPageTable()
+{
+    return pageTable;
+}
+
 void
 AddressSpace::copyPage(int i, int virtual_address)
 {
@@ -98,7 +104,7 @@ void AddressSpace::LoadPage(int vpage)
         }
     }
     pageTable[vpage].physicalPage = ppage;
-    pageTable[vpage].valid = true;
+    // pageTable[vpage].valid = true;
 }
 
 /**
@@ -130,7 +136,7 @@ AddressSpace::SaveToSwap(int vpn) {
 void
 AddressSpace::LoadFromSwap(int vpn, int ppn) {
     pageTable[vpn].physicalPage = ppn;
-    pageTable[vpn].valid = true;
+    // pageTable[vpn].valid = true;
     int inFileAddr = vpn * PAGE_SIZE;
     int inMemAddr = ppn * PAGE_SIZE;
     swap -> ReadAt(&machine->mainMemory[inMemAddr], PAGE_SIZE, inFileAddr);

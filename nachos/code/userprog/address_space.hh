@@ -45,6 +45,7 @@ public:
 
     unsigned getNumPages();
     TranslationEntry getTableEntry(int i);
+    TranslationEntry *getPageTable();
     void copyPage(int i, int virtual_address);
 
     #ifdef USE_TLB

@@ -103,11 +103,6 @@ Machine::ReadMem(unsigned addr, unsigned size, int *value)
         return false;
     }
 
-    #ifdef LRU_POLICY
-    ppage = physicalAddress / PAGE_SIZE;
-    coremap-> UpdateAge(ppage);
-    #endif
-
     switch (size) {
         case 1:
             data = machine->mainMemory[physicalAddress];
@@ -126,6 +121,12 @@ Machine::ReadMem(unsigned addr, unsigned size, int *value)
 
         default: ASSERT(false);
     }
+
+    #ifdef LRU_POLICY
+        int vpn = addr / PAGE_SIZE; 
+        TranslationEntry * entry = &pageTable[vpn];
+        entry->valid = false;
+    #endif
 
     DEBUG('a', "\tvalue read = %8.8x\n", *value);
     return true;
@@ -148,17 +149,12 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
     int ppage;
 
     DEBUG('a', "Writing VA 0x%X, size %u, value 0x%X\n", addr, size, value);
-
+    
     exception = Translate(addr, &physicalAddress, size, true);
     if (exception != NO_EXCEPTION) {
         machine->RaiseException(exception, addr);
         return false;
     }
-
-    #ifdef LRU_POLICY
-    ppage = physicalAddress / PAGE_SIZE;
-    coremap-> UpdateAge(ppage);
-    #endif
 
     switch (size) {
         case 1:
@@ -180,6 +176,11 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
             ASSERT(false);
     }
 
+    #ifdef LRU_POLICY
+        unsigned vpn = (unsigned) addr / PAGE_SIZE;
+        TranslationEntry * entry = &pageTable[vpn];
+        entry->valid = false;
+    #endif
     return true;
 }
 
