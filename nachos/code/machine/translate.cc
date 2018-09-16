@@ -123,9 +123,10 @@ Machine::ReadMem(unsigned addr, unsigned size, int *value)
     }
 
     #ifdef LRU_POLICY
-        int vpn = addr / PAGE_SIZE; 
-        TranslationEntry * entry = &pageTable[vpn];
-        entry->valid = false;
+        machine->RaiseException(PAGE_FAULT_EXCEPTION, addr);
+        // int vpn = addr / PAGE_SIZE;
+        // TranslationEntry *pTable = currentThread->space->getPageTable();
+        // pTable[vpn].valid=false;
     #endif
 
     DEBUG('a', "\tvalue read = %8.8x\n", *value);
@@ -149,7 +150,7 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
     int ppage;
 
     DEBUG('a', "Writing VA 0x%X, size %u, value 0x%X\n", addr, size, value);
-    
+
     exception = Translate(addr, &physicalAddress, size, true);
     if (exception != NO_EXCEPTION) {
         machine->RaiseException(exception, addr);
@@ -177,9 +178,10 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
     }
 
     #ifdef LRU_POLICY
-        unsigned vpn = (unsigned) addr / PAGE_SIZE;
-        TranslationEntry * entry = &pageTable[vpn];
-        entry->valid = false;
+    machine->RaiseException(PAGE_FAULT_EXCEPTION, addr);
+        // int vpn = addr / PAGE_SIZE;
+        // TranslationEntry *pTable = currentThread->space->getPageTable();
+        // pTable[vpn].valid=false;
     #endif
     return true;
 }

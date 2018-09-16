@@ -99,7 +99,7 @@ WriteStringToUser(const char *string, int userAddress)
   do {
     if(!machine->WriteMem(userAddress+i, 1, string[i])){
       if(!machine->WriteMem(userAddress+i, 1, string[i])){
-		    // ASSERT(machine->WriteMem(userAddress+i, 1, string[i]));
+		    ASSERT(machine->WriteMem(userAddress+i, 1, string[i]));
       }
     }
     i++;
@@ -111,8 +111,8 @@ WriteBufferToUser(const char *buffer, int userAddress,unsigned byteCount)
 {
 	for (unsigned i = 0; i < byteCount; i++)
     if(!machine->WriteMem(userAddress+i, 1, buffer[i])){
-      if(!machine->WriteMem(userAddress+i, 1, buffer[i])){    
-        // ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
+      if(!machine->WriteMem(userAddress+i, 1, buffer[i])){
+        ASSERT(machine->WriteMem(userAddress+i, 1, buffer[i]));
       }
     }
 }
@@ -357,15 +357,23 @@ ExceptionHandler(ExceptionType which)
         }
         #endif
 
-        #ifdef USE_TLB
-        current_space->insertToTLB(current_space->getTableEntry(vpn));
-        #endif
+        // #ifdef USE_TLB
+        // int tlb_entry = current_space->insertToTLB(current_space->getTableEntry(vpn));
+        // #endif
 
         #ifdef LRU_POLICY
-          int ppage = current_space->getTableEntry(vpn).physicalPage;
+        TranslationEntry *pTable = currentThread->space->getPageTable();
+        int ppage = current_space->getTableEntry(vpn).physicalPage;
+        if (!pTable[vpn].valid){
           coremap-> UpdateAge(ppage);
-          TranslationEntry *pT = currentThread->space->getPageTable();
-          pT[vpn].valid = true;
+          pTable[vpn].valid = true;
+
+          #ifdef USE_TLB
+          current_space->insertToTLB(current_space->getTableEntry(vpn));
+          #endif
+        } else {
+          pTable[vpn].valid = false;
+        }
         #endif
       }
 

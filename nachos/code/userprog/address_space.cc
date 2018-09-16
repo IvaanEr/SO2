@@ -104,7 +104,12 @@ void AddressSpace::LoadPage(int vpage)
         }
     }
     pageTable[vpage].physicalPage = ppage;
-    // pageTable[vpage].valid = true;
+    #ifndef LRU_POLICY
+    // If LRU_POLICY is enabled, we don't mark the page as valid. We want
+    // to have another page fault exception so that we can "count" every
+    // access.
+    pageTable[vpage].valid = true;
+    #endif
 }
 
 /**
@@ -136,7 +141,12 @@ AddressSpace::SaveToSwap(int vpn) {
 void
 AddressSpace::LoadFromSwap(int vpn, int ppn) {
     pageTable[vpn].physicalPage = ppn;
-    // pageTable[vpn].valid = true;
+    #ifndef LRU_POLICY
+    // If LRU_POLICY is enabled, we don't mark the page as valid. We want
+    // to have another page fault exception so that we can "count" every
+    // access.
+    pageTable[vpn].valid = true;
+    #endif
     int inFileAddr = vpn * PAGE_SIZE;
     int inMemAddr = ppn * PAGE_SIZE;
     swap -> ReadAt(&machine->mainMemory[inMemAddr], PAGE_SIZE, inFileAddr);
