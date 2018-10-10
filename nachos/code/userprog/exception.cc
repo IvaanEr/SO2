@@ -325,6 +325,7 @@ ExceptionHandler(ExceptionType which)
     else if (which == PAGE_FAULT_EXCEPTION) {
       int virtual_addr = machine->ReadRegister(BAD_VADDR_REG);
       int vpn = virtual_addr / PAGE_SIZE;
+      int ppage;
 
       AddressSpace * current_space = currentThread -> space;
 
@@ -351,6 +352,11 @@ ExceptionHandler(ExceptionType which)
 
         #ifdef USE_TLB
         current_space->insertToTLB(current_space->getTableEntry(vpn));
+        #endif
+
+        #ifdef LRU_POLICY
+        ppage = current_space->getTableEntry(vpn).physicalPage / PAGE_SIZE;
+        coremap-> UpdateAge(ppage);
         #endif
 
       }

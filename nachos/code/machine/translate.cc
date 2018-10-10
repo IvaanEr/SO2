@@ -103,11 +103,6 @@ Machine::ReadMem(unsigned addr, unsigned size, int *value)
         return false;
     }
 
-    #ifdef LRU_POLICY
-    ppage = physicalAddress / PAGE_SIZE;
-    coremap-> UpdateAge(ppage);
-    #endif
-
     switch (size) {
         case 1:
             data = machine->mainMemory[physicalAddress];
@@ -154,11 +149,6 @@ Machine::WriteMem(unsigned addr, unsigned size, int value)
         machine->RaiseException(exception, addr);
         return false;
     }
-
-    #ifdef LRU_POLICY
-    ppage = physicalAddress / PAGE_SIZE;
-    coremap-> UpdateAge(ppage);
-    #endif
 
     switch (size) {
         case 1:

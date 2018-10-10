@@ -44,6 +44,9 @@ PidManager *pidManager;
 
 #ifdef VMEM
 CoreMap *coremap;
+#ifdef LRU_POLICY
+Timer *lruTimer;
+#endif
 #else
 BitMap *bitmap;
 #endif
@@ -75,6 +78,14 @@ TimerInterruptHandler(void *dummy)
     if (interrupt->getStatus() != IDLE_MODE)
         interrupt->YieldOnReturn();
 }
+
+#ifdef LRU_POLICY
+static void
+lruTimerHandler(void *dummy){
+    currentThread->space->SaveState();
+    currentThread->space->RestoreState();
+}
+#endif
 
 /// Initialize Nachos global data structures.
 ///
@@ -192,6 +203,9 @@ Initialize(int argc, char **argv)
     pidManager = new PidManager();
   #ifdef VMEM
     coremap = new CoreMap(NUM_PHYS_PAGES);
+    #ifdef LRU_POLICY
+    lruTimer = new Timer(&lruTimerHandler, NULL, true);
+    #endif
   #else
     bitmap = new BitMap(NUM_PHYS_PAGES);
   #endif
