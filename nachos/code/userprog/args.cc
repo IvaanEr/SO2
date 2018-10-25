@@ -4,9 +4,14 @@
 const unsigned MAX_ARG_COUNT  = 32;
 const unsigned MAX_ARG_LENGTH = 128;
 
+
 void ReadStringFromUser(int userAddress, char *outString,
                         unsigned maxByteCount);
 void WriteStringToUser(const char *string, int userAddress);
+
+#define SafeReadMem(addr, size, value) if(!machine->ReadMem(addr, size, value)) {machine->ReadMem(addr, size, value);}
+#define SafeWriteMem(addr, size, value) if(!machine->WriteMem(addr, size, value)) {machine->WriteMem(addr, size, value);}
+
 
 void
 WriteArgs(char **args)
@@ -41,9 +46,11 @@ WriteArgs(char **args)
     for (unsigned j = 0; j < i; j++)
         // Save the address of the j-th argument counting from the end down
         // to the beginning.
-        machine->WriteMem(sp + 4 * j, 4, args_address[j]);
+        // machine->WriteMem(sp + 4 * j, 4, args_address[j]);
+        SafeWriteMem(sp + 4 * j, 4, args_address[j]);
 
-    machine->WriteMem(sp + 4 * i, 4, 0);  // The last is NULL.
+    // machine->WriteMem(sp + 4 * i, 4, 0);  // The last is NULL.
+    SafeWriteMem(sp + 4 * i, 4, 0);
     sp -= 16;  // Make room for the “register saves”.
 
     machine->WriteRegister(STACK_REG, sp);
@@ -64,7 +71,8 @@ SaveArgs(int address)
     int val;
     unsigned i = 0;
     do {
-        machine->ReadMem(address + i * 4, 4, &val);
+        // machine->ReadMem(address + i * 4, 4, &val);
+        SafeReadMem(address + i * 4, 4, &val);
         DEBUG('e', "ESTOY EN SaveArgs. Valor de val: %d - i = %d\n", val, i);
         i++;
     } while (i < MAX_ARG_COUNT && val != 0);
@@ -88,7 +96,8 @@ SaveArgs(int address)
         ret[j] = new char [MAX_ARG_LENGTH];
 
         // DEBUG('p', "ESTOY EN SaveArgs - jeje\n");
-        machine->ReadMem(address + j * 4, 4, &val);
+        // machine->ReadMem(address + j * 4, 4, &val);
+        SafeReadMem(address + j * 4, 4, &val);
         ReadStringFromUser(val, ret[j], MAX_ARG_LENGTH);
 
     }
